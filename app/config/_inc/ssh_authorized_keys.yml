@@ -1,0 +1,3 @@
+ssh_authorized_keys:
+  - {{ TRIM(FILE("/app/rsa_public_key")) }}
+  - {{ TRIM(FILE("/app/id_rsa.pub")) }}

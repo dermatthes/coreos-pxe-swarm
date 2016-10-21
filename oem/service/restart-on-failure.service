@@ -1,0 +1,11 @@
+[Unit]
+Description=Restart Node if connection to cluster is lost
+After=etcd2.service
+Requires=etcd2.service
+
+[Service]
+TimeoutStartSec=0
+ExecStart=/usr/bin/bash -c "while true; do sleep 10; fleetctl list-machines > /dev/null  || ( logger System 'ERROR. Disconnected from etcd2 cluster - restarting in 30s'; echo e > /proc/sysrq-trigger ; sleep 30; reboot; ) done;"
+
+[X-Fleet]
+Global=true

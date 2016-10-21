@@ -1,0 +1,22 @@
+[Service]
+User=etcd
+Environment=ETCD_DATA_DIR=/var/lib/etcd2
+Environment=ETCD_NAME=%m
+Environment=ETCD_INITIAL_CLUSTER_STATE=existing
+Restart=always
+RestartSec=10s
+LimitNOFILE=40000
+
+ExecStart=/usr/bin/bash -c "                                          \
+  export ETCD_ADVERTISE_CLIENT_URLS=http://$private_ipv4:2379;        \
+  export ETCD_INITIAL_ADVERTISE_PEER_URLS=http://$private_ipv4:2380;  \
+  export ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379;                 \
+  export ETCD_LISTEN_PEER_URLS=http://$private_ipv4:2380;             \
+  systemctl start etcd2 && sleep 2;                                   \
+                                                                      \
+  details=$(etcdctl member add $ETCD_NAME http://$private_ipv4:2380); \
+  eval export `echo "$details" | tail -n-3`;                          \
+                                                                      \
+  systemctl stop etcd2;                                               \
+  rm -rf /var/lib/etcd2/proxy;                                        \
+  /usr/bin/etcd2"

@@ -1,0 +1,1 @@
+hostname: coreos-{{ STR_REPLACE(".", "-", REMOTE_IP()) }}

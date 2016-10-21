@@ -1,0 +1,14 @@
+[Unit]
+Description=Docker Swarm
+After=docker.service
+Requires=docker.service
+Requires=etcd.service
+
+[Service]
+TimeoutStartSec=0
+ExecStartPre=- docker swarm leave
+ExecStart=docker run swarm join --addr=$COREOS_PRIVATE_IPV4:2375 etcd://$COREOS_PRIVATE_IPV4:2379/swarm
+ExecStop=docker swarm leave
+
+[X-Fleet]
+Global=true

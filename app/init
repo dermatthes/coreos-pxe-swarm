@@ -1,0 +1,68 @@
+#!/bin/bash
+
+set -e
+
+export PXE_SERVER_IP=$(ifconfig $INTERFACE | grep 'inet addr:' | cut -d: -f2 | awk '{print $1}')
+echo Server IP: $PXE_SERVER_IP
+
+
+if [ $MODE = 'BOOTSTRAP' ]
+then
+    echo "BOOTSTRAP TOKEN"
+    wget "https://discovery.etcd.io/new?size=3" -O /app/config/etcd_discovery_token
+
+    echo "BOOTSTRAP-MODE: Creating new ssh key pair for inter cluster communication"
+    ssh-keygen -b 2048 -t rsa -f /app/id_rsa -q -N ""
+    echo "KEYGEN DONE!"
+
+fi
+
+
+echo "Use default configs" && cp -a /app/config/. /config
+
+# Copy to tftp root
+cp -R /config/pxelinux.cfg /app/tftp
+chmod a+r /app/tftp/pxelinux.cfg/*
+
+# Update pxelinux config to point real server ip
+sed -i -e s/%\(server_ip\)s/$PXE_SERVER_IP/ /app/tftp/pxelinux.cfg/*
+
+echo "Starting python cloudconfig webserver (make sure to block outside requests to port 888)"
+# Start http server to host cloud.config
+
+cd /app/httpd/&& ./runHttpd.sh &
+
+
+# Start dnsmasq as dhcp proxy to $pxe_server_ip
+
+if [ $MODE = 'WORKERJOIN' ]
+then
+    ln -s /app/tftp/pxelinux.cfg/workerjoin /app/tftp/pxelinux.cfg/default
+    echo "MODE SELECT: JOIN MODE!"
+    dnsmasq \
+        --dhcp-range=$PXE_SERVER_IP,proxy \
+        --dhcp-no-overrid \
+        --dhcp-boot=pxelinux.0,pxeserver,$PXE_SERVER_IP \
+        --pxe-service=x86PC,"Join existing CoreOS Cluster",pxelinux \
+        --enable-tftp \
+        --tftp-root=/app/tftp \
+        --user=root \
+        --no-daemon
+fi
+
+if [ $MODE = 'BOOTSTRAP' ]
+then
+    ln -s /app/tftp/pxelinux.cfg/bootstrap /app/tftp/pxelinux.cfg/default
+    echo "MODE SELECT: BOOTSTRAP MODE! (new cluster only!)"
+    dnsmasq \
+        --dhcp-range=$PXE_SERVER_IP,proxy \
+        --dhcp-no-overrid \
+        --dhcp-boot=pxelinux.0,pxeserver,$PXE_SERVER_IP \
+        --pxe-service=x86PC,"Bootstrap CoreOS Cluster",pxelinux \
+        --enable-tftp \
+        --tftp-root=/app/tftp \
+        --user=root \
+        --no-daemon
+fi
+
+echo "ERROR: No MODE selected!"

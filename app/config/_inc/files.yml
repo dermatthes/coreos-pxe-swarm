@@ -1,0 +1,60 @@
+
+write_files:
+  - path: "/etc/environment"
+    content: |
+      COREOS_PRIVATE_IPV4={{ REMOTE_IP() }}
+
+
+write_files:
+  - path: "/bootpxe/rsa_public_key"
+    content: {{ TRIM(FILE("/app/rsa_public_key")) }}
+
+write_files:
+  - path: "/home/core/.ssh/id_rsa"
+    encoding: b64
+    permissions: '0600'
+    owner: core:root
+    content: {{ BASE64_ENC(FILE("/app/id_rsa")) }}
+
+write_files:
+  - path: "/home/core/.ssh/id_rsa.pub"
+    encoding: b64
+    owner: core:root
+    content: {{ BASE64_ENC(FILE("/app/id_rsa.pub")) }}
+
+write_files:
+  - path: "/bootpxe/coreos-pxe.service"
+    content: |
+      [Unit]
+      Description=CoreOSPxeAnnouncing
+      After=docker.service
+      Requires=docker.service
+
+      [Service]
+      TimeoutStartSec=0
+      ExecStartPre=-/usr/bin/docker kill coreos-pxe
+      ExecStartPre=-/usr/bin/docker rm coreos-pxe
+      ExecStartPre=/usr/bin/docker pull dermatthes/coreos-pxe
+      ExecStart=/usr/bin/docker run --net=host -e MODE=WORKERJOIN -e INTERFACE=enp8s0 -v /bootpxe/rsa_public_key:/app/rsa_public_key -v /home/core/.ssh/id_rsa:/app/id_rsa -v /home/core/.ssh/id_rsa.pub:/app/id_rsa.pub --name coreos-pxe dermatthes/coreos-pxe
+      ExecStop=/usr/bin/docker stop coreos-pxe
+
+write_files:
+  - path: /bootpxe/docker-swarm.service
+    content: |
+      [Unit]
+      Description=Docker Swarm
+      After=docker.service
+      Requires=docker.service
+      Requires=etcd.service
+
+      [Service]
+      TimeoutStartSec=0
+      Restart=always
+      ExecStartPre=- /usr/bin/docker stop swarm-agent
+      ExecStartPre=- /usr/bin/docker rm -f swarm-agent
+      ExecStartPre=- /usr/bin/docker pull swarm
+      ExecStart=/usr/bin/docker run --name=swarm-agent swarm join --addr=$COREOS_PRIVATE_IPV4:2375 etcd://$COREOS_PRIVATE_IPV4:2379/swarmnodes
+
+      ExecStartStop=/usr/bin/docker stop swarm-agent
+
+

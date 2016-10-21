@@ -1,0 +1,83 @@
+coreos:
+  units:
+    - name: etcd2.service
+      command: start
+    - name: docker-tcp.socket
+      command: start
+      enable: true
+      content: |
+        [Unit]
+        Description=Docker Socket for the API
+
+        [Socket]
+        ListenStream=2375
+        BindIPv6Only=both
+        Service=docker.service
+
+        [Install]
+        WantedBy=sockets.target
+
+    - name: docker.service
+      drop-ins:
+        - name: 30-custom.conf
+          content: |
+            [Service]
+            Environment="DOCKER_OPTS=--cluster-advertise {{ REMOTE_IP() }}:2375 --cluster-store etcd://{{ REMOTE_IP() }}:2379"
+
+    - name: swarm-agent.service
+      command: start
+      content: |
+        [Unit]
+        Description=Docker Swarm Agent Container
+        After=docker.service
+        Requires=docker.service
+
+        [Service]
+        TimeoutStartSec=0
+        Restart=always
+        ExecStartPre=-/usr/bin/docker stop swarm-agent
+        ExecStartPre=-/usr/bin/docker rm -f swarm-agent
+        ExecStartPre=-/usr/bin/docker pull swarm
+        ExecStart=/usr/bin/docker run --name=swarm-agent swarm join --addr={{ REMOTE_IP() }}:2375 etcd://{{ REMOTE_IP() }}:2379/nodes
+
+        [Install]
+        WantedBy=multi-user.target
+    - name: swarm-manager.service
+      command: start
+      content: |
+        [Unit]
+        Description=Docker Swarm Manager Container
+        After=docker.service
+        Requires=docker.service
+
+        [Service]
+        TimeoutStartSec=0
+        Restart=always
+        ExecStartPre=-/usr/bin/docker stop swarm-manager
+        ExecStartPre=-/usr/bin/docker rm -f swarm-manager
+        ExecStartPre=-/usr/bin/docker pull swarm
+        ExecStart=/usr/bin/docker run -p {{ REMOTE_IP() }}:4000:4000 --name=swarm-manager swarm manage -H :4000 --replication --advertise {{ REMOTE_IP() }}:4000 etcd://{{ REMOTE_IP() }}:2379/nodes
+
+        [Install]
+        WantedBy=multi-user.target
+
+
+    - name: cadvisor.service
+      command: start
+      content: |
+        [Unit]
+        Description=cAdvisor Container
+        After=docker.service
+        Requires=docker.service
+
+        [Service]
+        TimeoutStartSec=0
+        Restart=always
+        ExecStartPre=-/usr/bin/docker kill cadvisor
+        ExecStartPre=-/usr/bin/docker rm -f cadvisor
+        ExecStartPre=-/usr/bin/docker pull google/cadvisor
+        ExecStart=/usr/bin/docker run --volume=/:/rootfs:ro --volume=/var/run:/var/run:rw --volume=/sys:/sys:ro --volume=/var/lib/docker/:/var/lib/docker:ro --publish=8080:8080 --detach=true --name=cadvisor google/cadvisor
+        ExecStop=/usr/bin/docker stop cadvisor
+        [Install]
+        WantedBy=multi-user.target
+
