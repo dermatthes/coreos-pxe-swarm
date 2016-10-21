@@ -15,11 +15,11 @@ coreos:
      metadata: "role=service"
 
 
-
+{{ INCLUDE("_inc/files.yml") }}
 {{ INCLUDE("_inc/swarm.yml") }}
 {{ INCLUDE("_inc/hostname.yml") }}
 {{ INCLUDE("_inc/ssh_authorized_keys.yml") }}
-{{ INCLUDE("_inc/files.yml") }}
+
 
 
 
