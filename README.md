@@ -1,4 +1,4 @@
-# coreos-pxe
+# coreos-pxe-swarm
 Docker image for setting up an CoreOS PXE server 
 
 > This repository is a proof of concept only - don't use in production!
