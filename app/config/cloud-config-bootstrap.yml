@@ -21,7 +21,7 @@ coreos:
         Requires=docker.service
 
         [Service]
-        ExecStart=/bin/bash -c "docker swarm init --advertise-addr $COREOS_PRIVATE_IPV4 && docker swarm join-token -q worker > /root/worker_join_token && docker run --net=host -e PXE_SERVER_IP=$COREOS_PRIVATE_IPV4 -e MODE=WORKERJOIN -v /root/worker_join_token:/app/worker_join_token dermatthes/coreos-pxe-swarm"
+        ExecStart=/bin/bash -c "docker swarm init --advertise-addr {{ REMOTE_IP() }} && docker swarm join-token -q worker > /root/worker_join_token && docker run --net=host -e PXE_SERVER_IP={{ REMOTE_IP() }} -e MODE=WORKERJOIN -v /root/worker_join_token:/app/worker_join_token -v /bootpxe/rsa_public_key:/app/rsa_public_key -v /home/core/.ssh/id_rsa:/app/id_rsa -v /home/core/.ssh/id_rsa.pub:/app/id_rsa.pub dermatthes/coreos-pxe-swarm"
 
 
 
