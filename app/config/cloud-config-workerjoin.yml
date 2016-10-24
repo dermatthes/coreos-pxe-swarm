@@ -27,7 +27,7 @@ coreos:
         Requires=docker.service
 
         [Service]
-        ExecStart=/bin/bash -c "docker swarm join --token $(cat /root/worker_join_token) {{ ENV("COREOS_PRIVATE_IPV4") }}:2377"
+        ExecStart=/bin/bash -c "docker swarm join --token $(cat /root/worker_join_token) $(echo $PXE_SERVER_IP):2377"
 
 
 
