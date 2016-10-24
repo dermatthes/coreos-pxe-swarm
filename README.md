@@ -11,7 +11,7 @@ see coreos-pxe
 ### Booting the pxe initial machine
 
 ```
-docker run --net=host -e MODE=BOOTSTRAP -e INTERFACE=eth2 -v /root/.ssh/id_rsa.pub:/app/rsa_public_key --name corepxe dermatthes/coreos-pxe-swarm
+docker run --net=host -e MODE=BOOTSTRAP -e INTERFACE=eth2 -v /root/.ssh/id_rsa.pub:/root/rsa_public_key --name corepxe dermatthes/coreos-pxe-swarm
 ```
 
 After booting the the first machine, shutdown the service. 

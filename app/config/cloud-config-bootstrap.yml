@@ -8,8 +8,8 @@ write_files:
       COREOS_PRIVATE_IPV4={{ REMOTE_IP() }}
 
 ssh_authorized_keys:
-  - {{ TRIM(FILE("/app/rsa_public_key")) }}
-  - {{ TRIM(FILE("/app/id_rsa.pub")) }}
+  - {{ TRIM(FILE("/root/rsa_public_key")) }}
+  - {{ TRIM(FILE("/root/id_rsa.pub")) }}
 
 coreos:
   units:
@@ -24,7 +24,7 @@ coreos:
         [Service]
         ExecStartPre=- /usr/bin/docker kill swarm-manager
         ExecStartPre=- /usr/bin/docker rm swarm-manager
-        ExecStart=/bin/bash -c "docker swarm init --advertise-addr {{ REMOTE_IP() }} && docker swarm join-token -q worker > /root/worker_join_token && docker run --net=host -e PXE_SERVER_IP={{ REMOTE_IP() }} -e MODE=WORKERJOIN -v /root/worker_join_token:/root/worker_join_token -v /bootpxe/rsa_public_key:/app/rsa_public_key -v /home/core/.ssh/id_rsa:/app/id_rsa -v /home/core/.ssh/id_rsa.pub:/app/id_rsa.pub --name swarm-manager dermatthes/coreos-pxe-swarm"
+        ExecStart=/bin/bash -c "docker swarm init --advertise-addr {{ REMOTE_IP() }} && docker swarm join-token -q worker > /root/worker_join_token && docker run --net=host -e PXE_SERVER_IP={{ REMOTE_IP() }} -e MODE=WORKERJOIN -v /root/worker_join_token:/root/worker_join_token -v /root/rsa_public_key:/root/rsa_public_key -v /root/id_rsa:/root/id_rsa -v /root/id_rsa.pub:/root/id_rsa.pub --name swarm-manager dermatthes/coreos-pxe-swarm"
         ExecStop=/usr/bin/docker stop swarm-manager
 
 
