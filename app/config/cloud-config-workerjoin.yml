@@ -1,13 +1,6 @@
 #cloud-config
 
 {{ INCLUDE("_inc/hostname.yml") }}
-write_files:path:
-  - path: "/etc/systemd/system.conf.d/10-default-env.conf"
-    content: |
-      [Manager]
-      DefaultEnvironment=COREOS_PRIVATE_IPV4={{ REMOTE_IP() }}
-      DefaultEnvironment=PXE_SERVER_IP={{ ENV("PXE_SERVER_IP") }}
-
 
 ssh_authorized_keys:
   - {{ TRIM(FILE("/root/rsa_public_key")) }}
@@ -20,6 +13,17 @@ write_files:
 
 coreos:
   units:
+    - name: swarm-environment.service
+      command: start
+      content: |
+        [Unit]
+        Description=SetEnvVars
+        Before=docker.service
+
+        [Service]
+        Environment="COREOS_PRIVATE_IPV4={{ REMOTE_IP() }}"
+        Environment="PXE_SERVER_IP={{ ENV("PXE_SERVER_IP") }}"
+
     - name: swarm-join.service
       command: start
       content: |

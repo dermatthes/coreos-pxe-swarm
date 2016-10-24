@@ -3,12 +3,6 @@
 {{ INCLUDE("_inc/hostname.yml") }}
 
 
-write_files:path:
-  - path: "/etc/systemd/system.conf.d/10-default-env.conf"
-    content: |
-      [Manager]
-      DefaultEnvironment=COREOS_PRIVATE_IPV4={{ REMOTE_IP() }}
-
 write_files:
   - path: "/root/id_rsa"
     encoding: b64
@@ -38,6 +32,16 @@ ssh_authorized_keys:
 
 coreos:
   units:
+    - name: swarm-environment.service
+      command: start
+      content: |
+        [Unit]
+        Description=SetEnvVars
+        Before=docker.service
+
+        [Service]
+        Environment="COREOS_PRIVATE_IPV4={{ REMOTE_IP() }}"
+
     - name: swarm-init.service
       command: start
       content: |
