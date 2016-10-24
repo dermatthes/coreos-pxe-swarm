@@ -8,7 +8,8 @@ write_files:
       PXE_SERVER_IP={{ ENV("PXE_SERVER_IP") }}
 
 ssh_authorized_keys:
-  - {{ TRIM(FILE("/home/core/.ssh/id_rsa.pub")) }}
+  - {{ TRIM(FILE("/app/rsa_public_key")) }}
+  - {{ TRIM(FILE("/app/id_rsa.pub")) }}
 
 write_files:
   - path: "/root/worker_join_token"
