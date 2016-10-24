@@ -1,19 +1,33 @@
 #cloud-config
 
-coreos:
-  etcd2:
-    proxy: on
-    listen-client-urls: http://localhost:2379
-    initial-cluster: etcdserver=http://{{ ENV("PXE_SERVER_IP") }}:2380
-
-  fleet:
-    metadata: "role=worker"
-    etcd_servers: "http://localhost:2379"
-  
-
-
 {{ INCLUDE("_inc/hostname.yml") }}
 {{ INCLUDE("_inc/ssh_authorized_keys.yml") }}
 {{ INCLUDE("_inc/files.yml") }}
+write_files:
+  - path: "/etc/environment"
+    content: |
+      COREOS_PRIVATE_IPV4={{ REMOTE_IP() }}
+      PXE_SERVER_IP={{ ENV("PXE_SERVER_IP") }}
+
+write_files:
+  - path: "/app/worker_join_token"
+    encoding: b64
+    owner: core:root
+    content: {{ TRIM(FILE("/app/worker_join_token")) }}
+
+coreos:
+  units:
+    - name: swarm-join.service
+      command: start
+      content: |
+        [Unit]
+        Description=Docker Master
+        After=docker.service
+        Requires=docker.service
+
+        [Service]
+        ExecStart=/bin/bash -c "docker swarm join --tocken $(cat /app/worker_join_token) $PXE_SERVER_IPV4:2377"
+
+
 
 

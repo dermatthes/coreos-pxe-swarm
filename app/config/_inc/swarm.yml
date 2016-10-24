@@ -1,30 +1,19 @@
 coreos:
   units:
-    - name: etcd2.service
+    - name: swarm-init.service
       command: start
-    - name: docker-tcp.socket
-      command: start
-      enable: true
       content: |
         [Unit]
-        Description=Docker Socket for the API
+        Description=Docker Master
+        After=docker.service
+        Requires=docker.service
 
-        [Socket]
-        ListenStream=2375
-        BindIPv6Only=both
-        Service=docker.service
 
-        [Install]
-        WantedBy=sockets.target
+        [Service]
+        ExecStart=/usr/bin/docker run --name=swarm-agent swarm join --addr={{ REMOTE_IP() }}:2375 etcd://{{ REMOTE_IP() }}:2379/nodes
 
-    - name: docker.service
-      drop-ins:
-        - name: 30-custom.conf
-          content: |
-            [Service]
-            Environment="DOCKER_OPTS=--cluster-advertise {{ REMOTE_IP() }}:2375 --cluster-store etcd://{{ REMOTE_IP() }}:2379"
 
-    - name: swarm-agent.service
+    - name: swarm-worker.service
       command: start
       content: |
         [Unit]

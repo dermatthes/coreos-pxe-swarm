@@ -1,8 +1,5 @@
 
-write_files:
-  - path: "/etc/environment"
-    content: |
-      COREOS_PRIVATE_IPV4={{ REMOTE_IP() }}
+
 
 
 write_files:
@@ -21,19 +18,3 @@ write_files:
     encoding: b64
     owner: core:root
     content: {{ BASE64_ENC(FILE("/app/id_rsa.pub")) }}
-
-write_files:
-  - path: "/bootpxe/coreos-pxe.service"
-    content: |
-      [Unit]
-      Description=CoreOSPxeAnnouncing
-      After=docker.service
-      Requires=docker.service
-
-      [Service]
-      TimeoutStartSec=0
-      ExecStartPre=-/usr/bin/docker kill coreos-pxe
-      ExecStartPre=-/usr/bin/docker rm coreos-pxe
-      ExecStartPre=/usr/bin/docker pull dermatthes/coreos-pxe
-      ExecStart=/usr/bin/docker run --net=host -e MODE=WORKERJOIN -e INTERFACE=enp8s0 -v /bootpxe/rsa_public_key:/app/rsa_public_key -v /home/core/.ssh/id_rsa:/app/id_rsa -v /home/core/.ssh/id_rsa.pub:/app/id_rsa.pub --name coreos-pxe dermatthes/coreos-pxe
-      ExecStop=/usr/bin/docker stop coreos-pxe

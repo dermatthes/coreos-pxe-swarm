@@ -1,26 +1,27 @@
 #cloud-config
 
-coreos:
-  etcd2:
-    # generate a new token for each unique cluster from https://discovery.etcd.io/new?size=3
-    discovery: {{ TRIM(FILE("/app/config/etcd_discovery_token")) }}
-    advertise-client-urls: "http://{{ REMOTE_IP() }}:2379"
-    initial-advertise-peer-urls: "http://{{ REMOTE_IP() }}:2380"
-    # listen on both the official ports and the legacy ports
-    # legacy ports can be omitted if your application doesn't depend on them
-    listen-client-urls: "http://{{ REMOTE_IP() }}:2379,http://{{ REMOTE_IP() }}:4001,http://127.0.0.1:2379,http://127.0.0.1:4001"
-    listen-peer-urls: "http://{{ REMOTE_IP() }}:2380,http://{{ REMOTE_IP() }}:7001"
-
-  fleet:
-     metadata: "role=service"
-
-
 {{ INCLUDE("_inc/files.yml") }}
 {{ INCLUDE("_inc/swarm.yml") }}
 {{ INCLUDE("_inc/hostname.yml") }}
 {{ INCLUDE("_inc/ssh_authorized_keys.yml") }}
 
+write_files:
+  - path: "/etc/environment"
+    content: |
+      COREOS_PRIVATE_IPV4={{ REMOTE_IP() }}
 
+coreos:
+  units:
+    - name: swarm-init.service
+      command: start
+      content: |
+        [Unit]
+        Description=Docker Master
+        After=docker.service
+        Requires=docker.service
+
+        [Service]
+        ExecStart=/bin/bash -c "docker swarm init --advertise-addr $COREOS_PRIVATE_IPV4 && docker swarm join-token -q worker > /app/worker_join_token && docker run --net=host -e PXE_SERVER_IP=$COREOS_PRIVATE_IPV4 -e MODE=WORKERJOIN -v /app/worker_join_token:/app/worker_join_token dermatthes/coreos-pxe-swarm"
 
 
 
