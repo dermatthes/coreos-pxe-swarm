@@ -10,6 +10,7 @@ then
     export PXE_SERVER_IP=$(ifconfig $INTERFACE | grep 'inet addr:' | cut -d: -f2 | awk '{print $1}')
     echo Autodetect PXE_SERVER_IP: $PXE_SERVER_IP
 
+
     echo "BOOTSTRAP-MODE: Creating new ssh key pair for inter cluster communication"
     ssh-keygen -b 2048 -t rsa -f /app/id_rsa -q -N ""
     echo "KEYGEN DONE!"

@@ -1,19 +1,20 @@
 #cloud-config
 
 {{ INCLUDE("_inc/hostname.yml") }}
-{{ INCLUDE("_inc/ssh_authorized_keys.yml") }}
-{{ INCLUDE("_inc/files.yml") }}
 write_files:
   - path: "/etc/environment"
     content: |
       COREOS_PRIVATE_IPV4={{ REMOTE_IP() }}
       PXE_SERVER_IP={{ ENV("PXE_SERVER_IP") }}
 
+ssh_authorized_keys:
+  - {{ TRIM(FILE("/home/core/.ssh/id_rsa.pub")) }}
+
 write_files:
-  - path: "/app/worker_join_token"
+  - path: "/root/worker_join_token"
     encoding: b64
     owner: core:root
-    content: {{ TRIM(FILE("/app/worker_join_token")) }}
+    content: {{ TRIM(FILE("/root/worker_join_token")) }}
 
 coreos:
   units:
@@ -26,7 +27,7 @@ coreos:
         Requires=docker.service
 
         [Service]
-        ExecStart=/bin/bash -c "docker swarm join --tocken $(cat /app/worker_join_token) $PXE_SERVER_IPV4:2377"
+        ExecStart=/bin/bash -c "docker swarm join --tocken $(cat /root/worker_join_token) $PXE_SERVER_IP:2377"
 
 
 
