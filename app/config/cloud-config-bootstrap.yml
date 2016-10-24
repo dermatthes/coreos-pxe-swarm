@@ -17,11 +17,11 @@ coreos:
       content: |
         [Unit]
         Description=Docker Master
-        After=docker.service
+        After=user-config.target
         Requires=docker.service
 
         [Service]
-        ExecStart=/bin/bash -c "docker swarm init --advertise-addr $COREOS_PRIVATE_IPV4 && docker swarm join-token -q worker > /app/worker_join_token && docker run --net=host -e PXE_SERVER_IP=$COREOS_PRIVATE_IPV4 -e MODE=WORKERJOIN -v /app/worker_join_token:/app/worker_join_token dermatthes/coreos-pxe-swarm"
+        ExecStart=/bin/bash -c "docker swarm init --advertise-addr $COREOS_PRIVATE_IPV4 && docker swarm join-token -q worker > /root/worker_join_token && docker run --net=host -e PXE_SERVER_IP=$COREOS_PRIVATE_IPV4 -e MODE=WORKERJOIN -v /root/worker_join_token:/app/worker_join_token dermatthes/coreos-pxe-swarm"
 
 
 

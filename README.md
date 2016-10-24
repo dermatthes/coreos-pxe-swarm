@@ -8,17 +8,13 @@ Docker image for setting up an CoreOS PXE server
 
 see coreos-pxe
 
-### Monitoring
-
-Monitoring the cluster health
+### Booting the pxe initial machine
 
 ```
-etcdctl cluster-health
-etcdctl member list
+docker run --net=host -e MODE=BOOTSTRAP -e INTERFACE=eth2 -v /root/.ssh/id_rsa.pub:/app/rsa_public_key --name corepxe dermatthes/coreos-pxe-swarm
 ```
 
-remove a failed node
+After booting the the first machine, shutdown the service. 
+ 
 
-```
-etcdctl member remove <id>
-```
+Login to the first node.
