@@ -13,7 +13,6 @@ ssh_authorized_keys:
 
 write_files:
   - path: "/root/worker_join_token"
-    encoding: b64
     owner: core:root
     content: {{ TRIM(FILE("/root/worker_join_token")) }}
 
@@ -28,7 +27,7 @@ coreos:
         Requires=docker.service
 
         [Service]
-        ExecStart=/bin/bash -c "docker swarm join --tocken $(cat /root/worker_join_token) $PXE_SERVER_IP:2377"
+        ExecStart=/bin/bash -c "docker swarm join --token $(cat /root/worker_join_token) $PXE_SERVER_IP:2377"
 
 
 
