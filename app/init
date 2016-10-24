@@ -12,7 +12,7 @@ then
 
 
     echo "BOOTSTRAP-MODE: Creating new ssh key pair for inter cluster communication"
-    ssh-keygen -b 2048 -t rsa -f /root/id_rsa -q -N ""
+    ssh-keygen -b 2048 -t rsa -f /app/id_rsa -q -N ""
     echo "KEYGEN DONE!"
 
 fi
