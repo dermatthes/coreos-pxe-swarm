@@ -22,7 +22,7 @@ coreos:
       content: |
         [Unit]
         Description=Docker Master
-        After=user-config.target
+        After=sysinit.target
         Requires=docker.service
 
         [Service]
