@@ -8,10 +8,6 @@ write_files:
       COREOS_PRIVATE_IPV4={{ REMOTE_IP() }}
 
 write_files:
-  - path: "/root/worker_join_token"
-    content: {{ TRIM(FILE("/root/worker_join_token")) }}
-
-write_files:
   - path: "/root/id_rsa"
     encoding: b64
     permissions: '0600'
@@ -24,6 +20,13 @@ write_files:
     permissions: '0655'
     owner: core:root
     content: {{ BASE64_ENC(FILE("/root/id_rsa.pub")) }}
+
+write_files:
+  - path: "/root/rsa_public_key"
+    encoding: b64
+    permissions: '0655'
+    owner: core:root
+    content: {{ BASE64_ENC(FILE("/root/rsa_public_key")) }}
 
 ssh_authorized_keys:
   - {{ TRIM(FILE("/root/rsa_public_key")) }}
