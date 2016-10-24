@@ -2,10 +2,12 @@
 
 {{ INCLUDE("_inc/hostname.yml") }}
 
-write_files:
-  - path: "/etc/environment"
+
+write_files:path:
+  - path: "/etc/systemd/system.conf.d/10-default-env.conf"
     content: |
-      COREOS_PRIVATE_IPV4={{ REMOTE_IP() }}
+      [Manager]
+      DefaultEnvironment=COREOS_PRIVATE_IPV4={{ REMOTE_IP() }}
 
 write_files:
   - path: "/root/id_rsa"

@@ -1,11 +1,13 @@
 #cloud-config
 
 {{ INCLUDE("_inc/hostname.yml") }}
-write_files:
-  - path: "/etc/environment"
+write_files:path:
+  - path: "/etc/systemd/system.conf.d/10-default-env.conf"
     content: |
-      COREOS_PRIVATE_IPV4={{ REMOTE_IP() }}
-      PXE_SERVER_IP={{ ENV("PXE_SERVER_IP") }}
+      [Manager]
+      DefaultEnvironment=COREOS_PRIVATE_IPV4={{ REMOTE_IP() }}
+      DefaultEnvironment=PXE_SERVER_IP={{ ENV("PXE_SERVER_IP") }}
+
 
 ssh_authorized_keys:
   - {{ TRIM(FILE("/root/rsa_public_key")) }}
