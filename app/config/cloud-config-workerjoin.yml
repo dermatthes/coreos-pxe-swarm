@@ -1,7 +1,7 @@
 #cloud-config
 
-{{ INCLUDE("_inc/hostname.yml") }}
 
+hostname: swarmworker-{{ STR_REPLACE(".", "-", REMOTE_IP()) }}
 ssh_authorized_keys:
   - {{ TRIM(FILE("/root/rsa_public_key")) }}
   - {{ TRIM(FILE("/root/id_rsa.pub")) }}
@@ -11,20 +11,17 @@ write_files:
     owner: core:root
     content: {{ TRIM(FILE("/root/worker_join_token")) }}
 
+
+write_files:
+  - path: "/etc/environment"
+    permissions: '0655'
+    owner: core:root
+    content: |
+      COREOS_PRIVATE_IPV4={{ REMOTE_IP() }}
+      PXE_SERVER_IP={{ ENV("COREOS_PRIVATE_IPV4") }}
+
 coreos:
   units:
-    - name: swarm-environment.service
-      command: start
-      content: |
-        [Unit]
-        Description=SetEnvVars
-        Before=docker.service
-
-        [Service]
-        Environment="COREOS_PRIVATE_IPV4={{ REMOTE_IP() }}"
-        Environment="PXE_SERVER_IP={{ ENV("PXE_SERVER_IP") }}"
-        ExecStart=/bin/bash -c "sleep 1"
-
     - name: swarm-join.service
       command: start
       content: |
@@ -34,7 +31,8 @@ coreos:
         Requires=docker.service
 
         [Service]
-        ExecStart=/bin/bash -c "docker swarm join --token $(cat /root/worker_join_token) $(echo $PXE_SERVER_IP):2377"
+        EnvironmentFile=/etc/environment
+        ExecStart=/bin/bash -c "docker swarm join --token $(cat /root/worker_join_token) $PXE_SERVER_IP:2377"
 
 
 

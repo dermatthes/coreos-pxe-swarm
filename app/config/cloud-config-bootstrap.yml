@@ -1,7 +1,8 @@
 #cloud-config
 
-{{ INCLUDE("_inc/hostname.yml") }}
 
+
+hostname: swarmmaster-{{ STR_REPLACE(".", "-", REMOTE_IP()) }}
 
 write_files:
   - path: "/root/id_rsa"
@@ -24,6 +25,14 @@ write_files:
     owner: core:root
     content: {{ BASE64_ENC(FILE("/root/rsa_public_key")) }}
 
+write_files:
+  - path: "/etc/environment"
+    permissions: '0655'
+    owner: core:root
+    content: |
+      COREOS_PRIVATE_IPV4={{ REMOTE_IP() }}
+
+
 ssh_authorized_keys:
   - {{ TRIM(FILE("/root/rsa_public_key")) }}
   - {{ TRIM(FILE("/root/id_rsa.pub")) }}
@@ -32,27 +41,6 @@ ssh_authorized_keys:
 
 coreos:
   units:
-    - name: swarm-environment.service
-      command: start
-      content: |
-        [Unit]
-        Description=SetEnvVars
-        Before=docker.service
-
-        [Service]
-        Environment="COREOS_PRIVATE_IPV4={{ REMOTE_IP() }}"
-        ExecStart=/bin/bash -c "sleep 1"
-
-    - name: swarm-environment-writeback.service
-      command: start
-      content: |
-        [Unit]
-        Description=SetEnvVars
-        After=swarm-environment.service
-
-        [Service]
-        ExecStart=/bin/bash -c "echo $COREOS_PRIVATE_IPV4 > /tmp/wurstip"
-
     - name: swarm-init.service
       command: start
       content: |
@@ -62,6 +50,7 @@ coreos:
         Requires=docker.service
 
         [Service]
+        EnvironmentFile=/etc/environment
         ExecStartPre=- /usr/bin/docker kill swarm-manager
         ExecStartPre=- /usr/bin/docker rm swarm-manager
         ExecStart=/bin/bash -c "docker swarm init --advertise-addr {{ REMOTE_IP() }} && docker swarm join-token -q worker > /root/worker_join_token && sleep 5 && docker run --net=host -e PXE_SERVER_IP={{ REMOTE_IP() }} -e MODE=WORKERJOIN -v /root/worker_join_token:/root/worker_join_token -v /root/rsa_public_key:/root/rsa_public_key -v /root/id_rsa:/root/id_rsa -v /root/id_rsa.pub:/root/id_rsa.pub --name swarm-manager dermatthes/coreos-pxe-swarm"
