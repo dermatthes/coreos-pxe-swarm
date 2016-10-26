@@ -43,6 +43,16 @@ coreos:
         Environment="COREOS_PRIVATE_IPV4={{ REMOTE_IP() }}"
         ExecStart=/bin/bash -c "sleep 1"
 
+    - name: swarm-environment-writeback.service
+      command: start
+      content: |
+        [Unit]
+        Description=SetEnvVars
+        After=swarm-environment.service
+
+        [Service]
+        ExecStart=/bin/bash -c "echo $COREOS_PRIVATE_IPV4 > /tmp/wurstip"
+
     - name: swarm-init.service
       command: start
       content: |
