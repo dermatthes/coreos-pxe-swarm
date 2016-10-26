@@ -41,6 +41,7 @@ coreos:
 
         [Service]
         Environment="COREOS_PRIVATE_IPV4={{ REMOTE_IP() }}"
+        ExecStart=/bin/bash -c "sleep 1"
 
     - name: swarm-init.service
       command: start
