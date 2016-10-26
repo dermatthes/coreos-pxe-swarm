@@ -18,7 +18,7 @@ write_files:
     owner: core:root
     content: |
       COREOS_PRIVATE_IPV4={{ REMOTE_IP() }}
-      PXE_SERVER_IP={{ ENV("COREOS_PRIVATE_IPV4") }}
+      PXE_SERVER_IP={{ ENV("PXE_SERVER_IP") }}
 
 coreos:
   units:
