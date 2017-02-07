@@ -7,7 +7,7 @@ set -e
 
 if [ $MODE = 'BOOTSTRAP' ]
 then
-    export PXE_SERVER_IP=$(ifconfig $INTERFACE | grep 'inet addr:' | cut -d: -f2 | awk '{print $1}')
+    export PXE_SERVER_IP=$(ifconfig $INTERFACE_BOOTSTRAP | grep 'inet addr:' | cut -d: -f2 | awk '{print $1}')
     echo Autodetect PXE_SERVER_IP: $PXE_SERVER_IP
 
 

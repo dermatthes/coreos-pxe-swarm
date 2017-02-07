@@ -72,6 +72,8 @@ RUN cd /app/httpd && composer update
 
 
 # Customizations
-ENV INTERFACE=eth1
+ENV INTERFACE=enp0s5
+ENV INTERFACE_BOOTSTRAP=eth0
+ENV MODE=BOOTSTRAP
 
 CMD /app/init
