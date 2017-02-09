@@ -26,9 +26,8 @@ coreos:
       content: |
         [Unit]
         Description=Docker Master
-        After=sysinit.target
+        After=docker.service
         Requires=docker.service
-
         [Service]
         EnvironmentFile=/etc/environment
         ExecStart=/bin/bash -c "docker swarm join --token $(cat /root/worker_join_token) $PXE_SERVER_IP:2377"
@@ -39,6 +38,7 @@ coreos:
       content: |
         [Unit]
         Description=Formats the ephemeral drive
+        After=sysinit.target
         [Service]
         Type=oneshot
         RemainAfterExit=yes
