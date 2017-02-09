@@ -3,6 +3,13 @@
 set -e
 
 
+if [ $DEVMODE = '1' ]
+then
+    echo "Devmode startup..."
+    echo ""
+    /bin/bash
+    exit
+fi
 
 
 if [ $MODE = 'BOOTSTRAP' ]
@@ -55,13 +62,6 @@ cd /app/httpd/&& ./runHttpd.sh &
 
 
 
-if [ $DEVMODE = '1' ]
-then
-    echo "Devmode startup..."
-    echo ""
-    /bin/bash
-    exit
-fi
 
 # Start dnsmasq as dhcp proxy to $pxe_server_ip
 if [ $MODE = 'WORKERJOIN' ]
