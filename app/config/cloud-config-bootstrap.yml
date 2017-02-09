@@ -4,13 +4,6 @@
 
 hostname: swarmmaster-{{ STR_REPLACE(".", "-", REMOTE_IP()) }}
 
-write_files:
-  - path: "/root/id_rsa"
-    encoding: b64
-    permissions: '0600'
-    owner: core:root
-    content: {{ BASE64_ENC(FILE("/root/id_rsa")) }}
-
 
 write_files:
   - path: "/root/rsa_public_key"
