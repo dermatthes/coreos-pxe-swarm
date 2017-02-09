@@ -39,6 +39,7 @@ coreos:
         [Unit]
         Description=Formats the ephemeral drive
         After=sysinit.target
+        Requires=sysinit.target
         [Service]
         Type=oneshot
         RemainAfterExit=yes
