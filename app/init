@@ -21,7 +21,7 @@ fi
 # Using DHCP Proxy Mode
 if [ $DHCP_RANGE = '' ]
 then
-    $DHCP_RANGE = $PXE_SERVER_IP,proxy
+    DHCP_RANGE = $PXE_SERVER_IP,proxy
 fi
 
 
