@@ -7,6 +7,17 @@ set -e
 
 if [ $MODE = 'BOOTSTRAP' ]
 then
+    echo "BOOTSTRAP MODE..."
+
+    ifconfig $INTERFACE_BOOTSTRAP
+    if [[ $? != 0 ]]
+    then
+        echo "[ERROR!] Failed to autodetect ip address on interface: $INTERFACE_BOOTSTRAP"
+        echo "[ERROR!] Try setting -e INTERFACE_BOOTSTRAP to the correct network interface"
+        echo "[FAIL!]"
+        exit 255;
+    fi
+
     export PXE_SERVER_IP=$(ifconfig $INTERFACE_BOOTSTRAP | grep 'inet addr:' | cut -d: -f2 | awk '{print $1}')
     echo Autodetect PXE_SERVER_IP: $PXE_SERVER_IP
 
@@ -19,9 +30,10 @@ then
 fi
 
 # Using DHCP Proxy Mode
-if [ $DHCP_RANGE = '' ]
+if [ $DHCP_RANGE = '0' ]
 then
-    DHCP_RANGE = $PXE_SERVER_IP,proxy
+    DHCP_RANGE="$PXE_SERVER_IP,proxy"
+    echo "DHCP_RANGE is $DHCP_RANGE"
 fi
 
 
@@ -43,7 +55,13 @@ cd /app/httpd/&& ./runHttpd.sh &
 
 
 
-
+if [ $DEVMODE = '1' ]
+then
+    echo "Devmode startup..."
+    echo ""
+    /bin/bash
+    exit
+fi
 
 # Start dnsmasq as dhcp proxy to $pxe_server_ip
 if [ $MODE = 'WORKERJOIN' ]
@@ -51,7 +69,7 @@ then
     ln -s /app/tftp/pxelinux.cfg/workerjoin /app/tftp/pxelinux.cfg/default
     echo "MODE SELECT: JOIN MODE!"
     dnsmasq \
-        --dhcp-range=$DHCP_RANGE \
+        --dhcp-range="$DHCP_RANGE" \
         --dhcp-no-overrid \
         --dhcp-boot=pxelinux.0,pxeserver,$PXE_SERVER_IP \
         --pxe-service=x86PC,"Join existing CoreOS Cluster",pxelinux \
@@ -66,7 +84,7 @@ then
     ln -s /app/tftp/pxelinux.cfg/bootstrap /app/tftp/pxelinux.cfg/default
     echo "MODE SELECT: BOOTSTRAP MODE! (new cluster only!)"
     dnsmasq \
-        --dhcp-range=$DHCP_RANGE \
+        --dhcp-range="$DHCP_RANGE" \
         --dhcp-no-overrid \
         --dhcp-boot=pxelinux.0,pxeserver,$PXE_SERVER_IP \
         --pxe-service=x86PC,"Bootstrap CoreOS Cluster",pxelinux \

@@ -75,11 +75,12 @@ RUN cd /app/httpd && composer update
 ENV INTERFACE=enp0s5
 ENV INTERFACE_BOOTSTRAP=eth0
 ENV MODE=BOOTSTRAP
+ENV DEVMODE=0
 
 ENV DHCP=0
 
 # Default: use Proxy mode
-ENV DHCP_RANGE=''
+ENV DHCP_RANGE='0'
 
 
 CMD /app/init

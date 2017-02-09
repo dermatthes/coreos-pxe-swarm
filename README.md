@@ -11,7 +11,7 @@ see coreos-pxe
 ### Booting the pxe initial machine (DHCP Proxy mode with external DHCP Server) 
 
 ```
-docker run --net=host  -e BOOTSTRAP_INTERFACE=eth2 -v /root/.ssh/id_rsa.pub:/root/rsa_public_key --name corepxe dermatthes/coreos-pxe-swarm
+docker run --net=host  -e INTERFACE_BOOTSTRAP=eth2 -v /root/.ssh/id_rsa.pub:/root/rsa_public_key --name corepxe dermatthes/coreos-pxe-swarm
 ```
 
 After booting the the first machine, shutdown the service. 
@@ -19,7 +19,7 @@ After booting the the first machine, shutdown the service.
 ### Activate internal DHCP Server
 
 ```
-docker run --net=host -e BOOTSTRAP_INTERFACE=eth2 -e DHCP_RANGE="set:gateway1,192.168.123. -v /root/.ssh/id_rsa.pub:/root/rsa_public_key --name corepxe dermatthes/coreos-pxe-swarm
+docker run --net=host -e INTERFACE_BOOTSTRAP=eth2 -e DHCP_RANGE="set:gateway1,192.168.123. -v /root/.ssh/id_rsa.pub:/root/rsa_public_key --name corepxe dermatthes/coreos-pxe-swarm
 ```
 
 
@@ -29,7 +29,7 @@ docker run --net=host -e BOOTSTRAP_INTERFACE=eth2 -e DHCP_RANGE="set:gateway1,19
 
 | Option              | Default           | Description                                           |
 |---------------------|-------------------|-------------------------------------------------------|
-| BOOTSTAP_INTERFACE  | eth2              | Interface to start the PXE server in bootstrap mode   |
+| INTERFACE_BOOTSTRAP | eth2              | Interface to start the PXE server in bootstrap mode   |
 | MODE                | BOOTSTRAP         | (Internal only)                                       |
 | INTERFACE           | enp0s5            | Primary network interface to configure on nodes       |
 | DHCP_RANGE          | <myip>,proxy      | Pass DHCP options                                     |
