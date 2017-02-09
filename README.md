@@ -8,13 +8,43 @@ Docker image for setting up an CoreOS PXE server
 
 see coreos-pxe
 
-### Booting the pxe initial machine
+### Booting the pxe initial machine (DHCP Proxy mode with external DHCP Server) 
 
 ```
-docker run --net=host -e MODE=BOOTSTRAP -e INTERFACE=eth2 -v /root/.ssh/id_rsa.pub:/root/rsa_public_key --name corepxe dermatthes/coreos-pxe-swarm
+docker run --net=host  -e BOOTSTRAP_INTERFACE=eth2 -v /root/.ssh/id_rsa.pub:/root/rsa_public_key --name corepxe dermatthes/coreos-pxe-swarm
 ```
 
 After booting the the first machine, shutdown the service. 
  
+### Activate internal DHCP Server
+
+```
+docker run --net=host -e BOOTSTRAP_INTERFACE=eth2 -e DHCP_RANGE="set:gateway1,192.168.123. -v /root/.ssh/id_rsa.pub:/root/rsa_public_key --name corepxe dermatthes/coreos-pxe-swarm
+```
+
+
+## ALL Options
+
+### Environment
+
+| Option              | Default           | Description                                           |
+|---------------------|-------------------|-------------------------------------------------------|
+| BOOTSTAP_INTERFACE  | eth2              | Interface to start the PXE server in bootstrap mode   |
+| MODE                | BOOTSTRAP         | (Internal only)                                       |
+| INTERFACE           | enp0s5            | Primary network interface to configure on nodes       |
+| DHCP_RANGE          | <myip>,proxy      | Pass DHCP options                                     |
+
+### Authorized Keys
+
+Make sure to provide a SSH public key to `/root/rsa_public_key`. Do not 
+loose this key. It is the only way to log into the cluster!
+
+```
+-v ~/.ssh/id_rsa.pub:/root/rsa_public_key
+```
+Will do the task for your local user.
+
+
+
 
 Login to the first node.

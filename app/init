@@ -12,10 +12,18 @@ then
 
 
     echo "BOOTSTRAP-MODE: Creating new ssh key pair for inter cluster communication"
-    ssh-keygen -b 2048 -t rsa -f /root/id_rsa -q -N ""
+    echo "Keygen deativated!"
+    #ssh-keygen -b 2048 -t rsa -f /root/id_rsa -q -N ""
     echo "KEYGEN DONE!"
 
 fi
+
+# Using DHCP Proxy Mode
+if [ $DHCP_RANGE = '' ]
+then
+    $DHCP_RANGE = $PXE_SERVER_IP,proxy
+fi
+
 
 
 echo "Use default configs" && cp -a /app/config/. /config
@@ -33,14 +41,17 @@ echo "Starting python cloudconfig webserver (make sure to block outside requests
 cd /app/httpd/&& ./runHttpd.sh &
 
 
-# Start dnsmasq as dhcp proxy to $pxe_server_ip
 
+
+
+
+# Start dnsmasq as dhcp proxy to $pxe_server_ip
 if [ $MODE = 'WORKERJOIN' ]
 then
     ln -s /app/tftp/pxelinux.cfg/workerjoin /app/tftp/pxelinux.cfg/default
     echo "MODE SELECT: JOIN MODE!"
     dnsmasq \
-        --dhcp-range=$PXE_SERVER_IP,proxy \
+        --dhcp-range=$DHCP_RANGE \
         --dhcp-no-overrid \
         --dhcp-boot=pxelinux.0,pxeserver,$PXE_SERVER_IP \
         --pxe-service=x86PC,"Join existing CoreOS Cluster",pxelinux \
@@ -55,7 +66,7 @@ then
     ln -s /app/tftp/pxelinux.cfg/bootstrap /app/tftp/pxelinux.cfg/default
     echo "MODE SELECT: BOOTSTRAP MODE! (new cluster only!)"
     dnsmasq \
-        --dhcp-range=$PXE_SERVER_IP,proxy \
+        --dhcp-range=$DHCP_RANGE \
         --dhcp-no-overrid \
         --dhcp-boot=pxelinux.0,pxeserver,$PXE_SERVER_IP \
         --pxe-service=x86PC,"Bootstrap CoreOS Cluster",pxelinux \

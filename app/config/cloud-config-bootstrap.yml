@@ -11,12 +11,6 @@ write_files:
     owner: core:root
     content: {{ BASE64_ENC(FILE("/root/id_rsa")) }}
 
-write_files:
-  - path: "/root/id_rsa.pub"
-    encoding: b64
-    permissions: '0655'
-    owner: core:root
-    content: {{ BASE64_ENC(FILE("/root/id_rsa.pub")) }}
 
 write_files:
   - path: "/root/rsa_public_key"
@@ -35,7 +29,6 @@ write_files:
 
 ssh_authorized_keys:
   - {{ TRIM(FILE("/root/rsa_public_key")) }}
-  - {{ TRIM(FILE("/root/id_rsa.pub")) }}
 
 
 
@@ -53,7 +46,7 @@ coreos:
         EnvironmentFile=/etc/environment
         ExecStartPre=- /usr/bin/docker kill swarm-manager
         ExecStartPre=- /usr/bin/docker rm swarm-manager
-        ExecStart=/bin/bash -c "docker swarm init --advertise-addr {{ REMOTE_IP() }} && docker swarm join-token -q worker > /root/worker_join_token && sleep 5 && docker run --net=host -e PXE_SERVER_IP={{ REMOTE_IP() }} -e MODE=WORKERJOIN -v /root/worker_join_token:/root/worker_join_token -v /root/rsa_public_key:/root/rsa_public_key -v /root/id_rsa:/root/id_rsa -v /root/id_rsa.pub:/root/id_rsa.pub --name swarm-manager dermatthes/coreos-pxe-swarm"
+        ExecStart=/bin/bash -c "docker swarm init --advertise-addr {{ REMOTE_IP() }} && docker swarm join-token -q worker > /root/worker_join_token && sleep 5 && docker run --net=host -e PXE_SERVER_IP={{ REMOTE_IP() }} -e DHCP_RANGE={{ ENV("DHCP_RANGE") }}-e MODE=WORKERJOIN -v /root/worker_join_token:/root/worker_join_token -v /root/rsa_public_key:/root/rsa_public_key --name swarm-manager dermatthes/coreos-pxe-swarm"
         ExecStop=/usr/bin/docker stop swarm-manager
 
 

@@ -4,7 +4,6 @@
 hostname: swarmworker-{{ STR_REPLACE(".", "-", REMOTE_IP()) }}
 ssh_authorized_keys:
   - {{ TRIM(FILE("/root/rsa_public_key")) }}
-  - {{ TRIM(FILE("/root/id_rsa.pub")) }}
 
 write_files:
   - path: "/root/worker_join_token"

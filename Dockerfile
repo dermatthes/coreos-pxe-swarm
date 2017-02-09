@@ -76,4 +76,10 @@ ENV INTERFACE=enp0s5
 ENV INTERFACE_BOOTSTRAP=eth0
 ENV MODE=BOOTSTRAP
 
+ENV DHCP=0
+
+# Default: use Proxy mode
+ENV DHCP_RANGE=''
+
+
 CMD /app/init
