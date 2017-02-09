@@ -49,4 +49,34 @@ coreos:
         ExecStart=/bin/bash -c "docker swarm init --advertise-addr {{ REMOTE_IP() }} && docker swarm join-token -q worker > /root/worker_join_token && sleep 5 && docker run --net=host -e PXE_SERVER_IP={{ REMOTE_IP() }} -e DHCP_RANGE={{ ENV("DHCP_RANGE") }}-e MODE=WORKERJOIN -v /root/worker_join_token:/root/worker_join_token -v /root/rsa_public_key:/root/rsa_public_key --name swarm-manager dermatthes/coreos-pxe-swarm"
         ExecStop=/usr/bin/docker stop swarm-manager
 
+    - name: format-ephemeral.service
+      command: start
+      content: |
+        [Unit]
+        Description=Formats the ephemeral drive
+        After=dev-xvdb.device
+        Requires=dev-xvdb.device
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=/usr/sbin/wipefs -f /dev/sda
+        ExecStart=/usr/sbin/mkfs.ext4 -F /dev/sda
+    - name: var-lib-docker.mount
+      command: start
+      content: |
+        [Unit]
+        Description=Mount ephemeral to /var/lib/docker
+        Requires=format-ephemeral.service
+        After=format-ephemeral.service
+        [Mount]
+        What=/dev/sda
+        Where=/var/lib/docker
+        Type=ext4
+    - name: docker.service
+      drop-ins:
+        - name: 10-wait-docker.conf
+          content: |
+            [Unit]
+            After=var-lib-docker.mount
+            Requires=var-lib-docker.mount
 
