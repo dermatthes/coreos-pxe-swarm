@@ -34,4 +34,35 @@ coreos:
         ExecStart=/bin/bash -c "docker swarm join --token $(cat /root/worker_join_token) $PXE_SERVER_IP:2377"
 
 
+    - name: format-ephemeral.service
+      command: start
+      content: |
+        [Unit]
+        Description=Formats the ephemeral drive
+        After=dev-xvdb.device
+        Requires=dev-xvdb.device
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=/usr/sbin/wipefs -f /dev/disk/by-label/COREOS_ROOT
+        ExecStart=/usr/sbin/mkfs.ext4 -L COREOS_ROOT -F /dev/disk/by-label/COREOS_ROOT
+    - name: var-lib-docker.mount
+      command: start
+      content: |
+        [Unit]
+        Description=Mount ephemeral to /var/lib/docker
+        Requires=format-ephemeral.service
+        After=format-ephemeral.service
+        [Mount]
+        What=/dev/disk/by-label/COREOS_ROOT
+        Where=/var/lib/docker
+        Type=ext4
+    - name: docker.service
+      drop-ins:
+        - name: 10-wait-docker.conf
+          content: |
+            [Unit]
+            After=var-lib-docker.mount
+            Requires=var-lib-docker.mount
+
 

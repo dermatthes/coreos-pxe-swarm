@@ -46,5 +46,14 @@ Will do the task for your local user.
 
 
 
+### Auto formating harddisks
+
+By default the disks labeld with `COREOS_ROOT` will be formated 
+ on reboot. To initialize a new harddisk you'll have to manually
+ label this device:
+
+```
+sudo mkfs.ext4 -L COREOS_ROOT /dev/sda
+```
 
 Login to the first node.

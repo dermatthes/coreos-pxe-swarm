@@ -59,8 +59,8 @@ coreos:
         [Service]
         Type=oneshot
         RemainAfterExit=yes
-        ExecStart=/usr/sbin/wipefs -f /dev/sda
-        ExecStart=/usr/sbin/mkfs.ext4 -F /dev/sda
+        ExecStart=/usr/sbin/wipefs -f /dev/disk/by-label/COREOS_ROOT
+        ExecStart=/usr/sbin/mkfs.ext4 -L COREOS_ROOT -F /dev/disk/by-label/COREOS_ROOT
     - name: var-lib-docker.mount
       command: start
       content: |
@@ -69,7 +69,7 @@ coreos:
         Requires=format-ephemeral.service
         After=format-ephemeral.service
         [Mount]
-        What=/dev/sda
+        What=/dev/disk/by-label/COREOS_ROOT
         Where=/var/lib/docker
         Type=ext4
     - name: docker.service
