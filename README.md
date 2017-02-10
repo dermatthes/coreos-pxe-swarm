@@ -57,3 +57,13 @@ sudo mkfs.ext4 -L COREOS_ROOT /dev/sda
 ```
 
 Login to the first node.
+
+
+### Starting NFS4 Server
+
+/etc/exports
+```
+/mnt  10.16.0.0/24(rw,async,no_subtree_check,no_root_squash,fsid=0)
+```
+
+and start `udo systemctl restart rpc-mountd`

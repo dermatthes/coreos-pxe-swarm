@@ -32,7 +32,6 @@ coreos:
         EnvironmentFile=/etc/environment
         ExecStart=/bin/bash -c "docker swarm join --token $(cat /root/worker_join_token) $PXE_SERVER_IP:2377"
 
-
     - name: format-ephemeral.service
       command: start
       content: |
