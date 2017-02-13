@@ -37,6 +37,7 @@ write_files:
       :FORWARD DROP [0:0]
       :OUTPUT ACCEPT [0:0]
       -A INPUT -s 10.16.0.0/24 -j ACCEPT
+      -I INPUT -d 224.0.0.0/8 -p vrrp -j ACCEPT
       -A INPUT -i lo -j ACCEPT
       -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
       -A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
