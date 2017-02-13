@@ -99,8 +99,8 @@ coreos:
         [Service]
         Type=oneshot
         RemainAfterExit=yes
-        ExecStart=mkdir /var/lib/docker/nfs
-        ExecStart=ln -s /var/lib/docker/nfs /srv/nfs
+        ExecStart=/usr/bin/mkdir /var/lib/docker/nfs
+        ExecStart=/usr/bin/ln -s /var/lib/docker/nfs /srv/nfs
 
     - name: rpc-mountd.service
       command: start
