@@ -19,14 +19,6 @@ write_files:
     content: |
       COREOS_PRIVATE_IPV4={{ REMOTE_IP() }}
 
-
-ssh_authorized_keys:
-  - {{ TRIM(FILE("/root/rsa_public_key")) }}
-
-coreos:
-  units:
-    - name: iptables-restore.service
-      enable: true
 write_files:
   - path: /var/lib/iptables/rules-save
     permissions: 0644
@@ -49,8 +41,19 @@ write_files:
       -A INPUT -d 46.183.102.0/24 -j DROP
       COMMIT
 
+
+ssh_authorized_keys:
+  - {{ TRIM(FILE("/root/rsa_public_key")) }}
+
+
+
+
 coreos:
   units:
+    - name: iptables-restore.service
+      command: start
+      enable: true
+
     - name: swarm-init.service
       command: start
       content: |
@@ -86,6 +89,26 @@ coreos:
         What=/dev/disk/by-label/COREOS_ROOT
         Where=/var/lib/docker
         Type=ext4
+
+    - name: nfs-server-bind.service
+      command: start
+      content: |
+        [Unit]
+        Description=Link /var/lib/docker/nfs to /srv/nfs
+        Requires=var-lib-docker.mount
+        After=var-lib-docker.mount
+        Before=rpc-mountd.service
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=mkdir /var/lib/docker/nfs
+        ExecStart=ln -s /var/lib/docker/nfs /srv/nfs
+
+    - name: rpc-mountd.service
+      command: start
+      enable: true
+
+
     - name: docker.service
       drop-ins:
         - name: 10-wait-docker.conf
