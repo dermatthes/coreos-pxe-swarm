@@ -19,6 +19,13 @@ write_files:
       COREOS_PRIVATE_IPV4={{ REMOTE_IP() }}
       PXE_SERVER_IP={{ ENV("PXE_SERVER_IP") }}
 
+write_files:
+  - path: "/etc/exports"
+    permissions: '0655'
+    owner: core:root
+    content: |
+      /srv/nfs 10.16.0.0/24(rw,async,no_subtree_check,no_root_squash,fsid=0)
+
 coreos:
   units:
     - name: swarm-join.service
@@ -55,6 +62,21 @@ coreos:
         What=/dev/disk/by-label/COREOS_ROOT
         Where=/var/lib/docker
         Type=ext4
+    - name: nfs-server-bind.link
+      command: start
+      content: |
+        [Unit]
+        Description=Link /var/lib/docker/nfs to /srv/nfs
+        Requires=var-lib-docker.mount
+        After=var-lib-docker.mount
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=mkdir /var/lib/docker/nfs
+        ExecStart=ln -s /var/lib/docker/nfs /srv/nfs
+    - name: rpc-mountd.service
+      command: start
+      enable: true
     - name: docker.service
       drop-ins:
         - name: 10-wait-docker.conf

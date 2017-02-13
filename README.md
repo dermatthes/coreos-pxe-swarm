@@ -66,4 +66,4 @@ Login to the first node.
 /mnt  10.16.0.0/24(rw,async,no_subtree_check,no_root_squash,fsid=0)
 ```
 
-and start `udo systemctl restart rpc-mountd`
+and start `sudo systemctl restart rpc-mountd`
