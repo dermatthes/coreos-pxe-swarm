@@ -46,8 +46,6 @@ ssh_authorized_keys:
   - {{ TRIM(FILE("/root/rsa_public_key")) }}
 
 
-
-
 coreos:
   units:
     - name: iptables-restore.service
