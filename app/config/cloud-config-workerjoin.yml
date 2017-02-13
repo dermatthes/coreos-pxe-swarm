@@ -50,7 +50,7 @@ write_files:
       -A INPUT -p icmp -m icmp --icmp-type 0 -j ACCEPT
       -A INPUT -p icmp -m icmp --icmp-type 3 -j ACCEPT
       -A INPUT -p icmp -m icmp --icmp-type 11 -j ACCEPT
-      -A INPUT -i enp0s5 -j DROP
+      -A INPUT -d 46.183.102.0/24 -j DROP
       COMMIT
 
 
