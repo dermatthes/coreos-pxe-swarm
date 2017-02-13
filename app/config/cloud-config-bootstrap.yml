@@ -20,6 +20,13 @@ write_files:
       COREOS_PRIVATE_IPV4={{ REMOTE_IP() }}
 
 write_files:
+  - path: "/etc/exports"
+    permissions: '0655'
+    owner: core:root
+    content: |
+      /srv/nfs 10.16.0.0/24(rw,async,no_subtree_check,no_root_squash,fsid=0)
+
+write_files:
   - path: /var/lib/iptables/rules-save
     permissions: 0644
     owner: root:root
