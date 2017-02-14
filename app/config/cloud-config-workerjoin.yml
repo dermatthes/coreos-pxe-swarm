@@ -31,6 +31,23 @@ write_files:
     content: |
       /srv/nfs 10.16.0.0/24(rw,async,no_subtree_check,no_root_squash,fsid=0)
 
+write-files:
+  - path: /etc/conf.d/nfs
+    permissions: '0644'
+    content: |
+      OPTS_RPC_MOUNTD=""
+coreos:
+  units:
+    - name: rpc-statd.service
+      command: start
+      enable: true
+    - name: mnt-data.mount
+      command: start
+      content: |
+        [Mount]
+        What=10.16.0.2:/srv/nfs
+        Where=/mnt
+        Type=nfs
 
 write_files:
   - path: /var/lib/iptables/rules-save
