@@ -18,6 +18,7 @@ write_files:
     owner: core:root
     content: |
       COREOS_PRIVATE_IPV4={{ REMOTE_IP() }}
+      DHCP_RANGE={{ ENV("DHCP_RANGE") }}
 
 write_files:
   - path: "/etc/exports"
