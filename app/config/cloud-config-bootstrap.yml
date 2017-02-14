@@ -64,7 +64,7 @@ coreos:
     - name: rpc-statd.service
       command: start
       enable: true
-    - name: mnt-data.mount
+    - name: mnt.mount
       command: start
       content: |
         [Mount]
