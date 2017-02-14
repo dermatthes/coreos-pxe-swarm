@@ -10,6 +10,10 @@ write_files:
     owner: core:root
     content: {{ TRIM(FILE("/root/worker_join_token")) }}
 
+write_files:
+  - path: "/root/rsa_public_key"
+    owner: core:root
+    content: {{ TRIM(FILE("/root/rsa_public_key")) }}
 
 write_files:
   - path: "/etc/environment"
