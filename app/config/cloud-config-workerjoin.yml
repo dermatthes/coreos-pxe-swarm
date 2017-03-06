@@ -24,9 +24,60 @@ write_files:
       PXE_SERVER_IP={{ ENV("PXE_SERVER_IP") }}
       DHCP_RANGE={{ ENV("DHCP_RANGE") }}
 
+write_files:
+  - path: "/etc/exports"
+    permissions: '0655'
+    owner: core:root
+    content: |
+      /srv/nfs 10.16.0.0/24(rw,async,no_subtree_check,no_root_squash,fsid=0)
+
+write-files:
+  - path: /etc/conf.d/nfs
+    permissions: '0644'
+    content: |
+      OPTS_RPC_MOUNTD=""
+coreos:
+  units:
+    - name: rpc-statd.service
+      command: start
+      enable: true
+    - name: mnt.mount
+      command: start
+      content: |
+        [Mount]
+        What=10.16.0.2:/srv/nfs
+        Where=/mnt
+        Type=nfs
+
+write_files:
+  - path: /var/lib/iptables/rules-save
+    permissions: 0644
+    owner: root:root
+    content: |
+      *filter
+      :INPUT ACCEPT [0:0]
+      :FORWARD DROP [0:0]
+      :OUTPUT ACCEPT [0:0]
+      -A INPUT -s 10.16.0.0/24 -d 10.16.0.0/24 -j ACCEPT
+      -I INPUT -d 224.0.0.0/8 -p vrrp -j ACCEPT
+      -A INPUT -i lo -j ACCEPT
+      -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+      -A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
+      -A INPUT -p tcp -m tcp --dport 80 -j ACCEPT
+      -A INPUT -p tcp -m tcp --dport 443 -j ACCEPT
+      -A INPUT -p icmp -m icmp --icmp-type 0 -j ACCEPT
+      -A INPUT -p icmp -m icmp --icmp-type 8 -j ACCEPT
+      -A INPUT -p icmp -m icmp --icmp-type 3 -j ACCEPT
+      -A INPUT -p icmp -m icmp --icmp-type 11 -j ACCEPT
+      -A INPUT -d 46.183.102.0/24 -j DROP
+      COMMIT
 
 coreos:
   units:
+    - name: iptables-restore.service
+      command: start
+      enable: true
+
     - name: swarm-join.service
       command: start
       content: |
@@ -37,3 +88,55 @@ coreos:
         [Service]
         EnvironmentFile=/etc/environment
         ExecStart=/bin/bash -c "docker swarm join --token $(cat /root/worker_join_token) $PXE_SERVER_IP:2377 && docker run --net=host -e PXE_SERVER_IP={{ REMOTE_IP() }} -e DHCP_RANGE={{ ENV("DHCP_RANGE") }} -e MODE=WORKERJOIN -v /root/worker_join_token:/root/worker_join_token -v /root/rsa_public_key:/root/rsa_public_key --name coreos-pxe-swarm dermatthes/coreos-pxe-swarm"
+
+    - name: format-ephemeral.service
+      command: start
+      content: |
+        [Unit]
+        Description=Formats the ephemeral drive
+        After=sysinit.target
+        Requires=sysinit.target
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=/usr/sbin/wipefs -f /dev/disk/by-label/COREOS_ROOT
+        ExecStart=/usr/sbin/mkfs.ext4 -L COREOS_ROOT -F /dev/disk/by-label/COREOS_ROOT
+    - name: var-lib-docker.mount
+      command: start
+      content: |
+        [Unit]
+        Description=Mount ephemeral to /var/lib/docker
+        Requires=format-ephemeral.service
+        After=format-ephemeral.service
+        [Mount]
+        What=/dev/disk/by-label/COREOS_ROOT
+        Where=/var/lib/docker
+        Type=ext4
+
+    - name: nfs-server-bind.service
+      command: start
+      content: |
+        [Unit]
+        Description=Link /var/lib/docker/nfs to /srv/nfs
+        Requires=var-lib-docker.mount
+        After=var-lib-docker.mount
+        Before=rpc-mountd.service
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=/usr/bin/mkdir /var/lib/docker/nfs
+        ExecStart=/usr/bin/ln -s /var/lib/docker/nfs /srv/nfs
+
+    - name: rpc-mountd.service
+      command: start
+      enable: true
+
+    - name: docker.service
+      drop-ins:
+        - name: 10-wait-docker.conf
+          content: |
+            [Unit]
+            After=var-lib-docker.mount
+            Requires=var-lib-docker.mount
+
+
