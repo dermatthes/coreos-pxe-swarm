@@ -22,7 +22,7 @@ write_files:
       DHCP_RANGE={{ ENV("DHCP_RANGE") }}
 coreos:
   units:
-  - name: swarm-init.service
+    - name: swarm-init.service
       command: start
       content: |
         [Unit]
