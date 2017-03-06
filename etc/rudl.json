@@ -1,0 +1,33 @@
+{
+  "groups": {
+    "master": {
+      "ips": [
+        "10.16.0.10",
+        "10.16.0.11",
+        "10.16.0.12"
+      ],
+      "cloud-config": "/etc/cloud-config-master.yml",
+      "run": [
+        "docker run ..to run on master hosts.."
+      ]
+    }
+
+  },
+  "run": [
+      "scripts to run on each host"
+  ],
+  "registry": [
+    {
+      "url": "someRegistry.someHost.com",
+      "user": "someUser",
+      "pass": "SomePass"
+    }
+  ],
+  "reboot": {
+    "*": {
+      "strategy": "day-of-week",
+      "time": "07:00:00"
+    }
+  }
+
+}
