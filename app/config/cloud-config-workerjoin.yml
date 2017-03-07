@@ -58,7 +58,7 @@ write_files:
       :INPUT ACCEPT [0:0]
       :FORWARD DROP [0:0]
       :OUTPUT ACCEPT [0:0]
-      -A INPUT -s 10.16.0.0/24 -d 10.16.0.0/24 -j ACCEPT
+      -A INPUT -s 10.0.0.0/8 -d 10.0.0.0/8 -j ACCEPT
       -I INPUT -d 224.0.0.0/8 -p vrrp -j ACCEPT
       -A INPUT -i lo -j ACCEPT
       -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
@@ -69,7 +69,7 @@ write_files:
       -A INPUT -p icmp -m icmp --icmp-type 8 -j ACCEPT
       -A INPUT -p icmp -m icmp --icmp-type 3 -j ACCEPT
       -A INPUT -p icmp -m icmp --icmp-type 11 -j ACCEPT
-      -A INPUT -d 46.183.102.0/24 -j DROP
+      -A INPUT -d 0.0.0.0/0 -j DROP
       COMMIT
 
 coreos:
