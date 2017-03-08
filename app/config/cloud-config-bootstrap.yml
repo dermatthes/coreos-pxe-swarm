@@ -27,6 +27,19 @@ write_files:
       DHCP_RANGE={{ ENV("DHCP_RANGE") }}
 
 write_files:
+  - path: "/root/promote_masters.sh"
+    owner: core:root
+    permissions: '0755'
+    content: |
+      #!/bin/bash
+      set +e
+      while 1; do
+          sleep 30
+          docker node promote `docker node ls | tail -n +2 | awk '{print $1} '`
+      done
+
+
+write_files:
   - path: "/etc/exports"
     permissions: '0655'
     owner: core:root
@@ -95,6 +108,17 @@ coreos:
         ExecStart=/bin/bash -c "docker swarm init --advertise-addr {{ REMOTE_IP() }} && docker swarm join-token -q worker > /root/worker_join_token && sleep 5 && docker run --net=host -e NFS_MOUNT={{ ENV("NFS_MOUNT") }} -e MODE=WORKERJOIN -e DHCP_RANGE=$DHCP_RANGE -e PXE_SERVER_IP=$COREOS_PRIVATE_IPV4 -v /root/config:/root/config -v /root/worker_join_token:/root/worker_join_token -v /root/rsa_public_key:/root/rsa_public_key --name coreos-pxe-swarm dermatthes/coreos-pxe-swarm"
         ExecStop=/usr/bin/docker stop coreos-pxe-swarm
 
+    - name: promote-master.service
+      command: start
+      content: |
+        [Unit]
+        Description=Docker Master
+        After=swarm-join.service
+        Requires=docker.service
+        [Service]
+        EnvironmentFile=/etc/environment
+        ExecStart=/bin/bash -c "/root/promote_masters.sh > /dev/null &"
+
     - name: format-ephemeral.service
       command: start
       content: |
@@ -107,6 +131,8 @@ coreos:
         RemainAfterExit=yes
         ExecStart=/usr/sbin/wipefs -f /dev/disk/by-label/COREOS_ROOT
         ExecStart=/usr/sbin/mkfs.ext4 -L COREOS_ROOT -F /dev/disk/by-label/COREOS_ROOT
+
+
     - name: var-lib-docker.mount
       command: start
       content: |
