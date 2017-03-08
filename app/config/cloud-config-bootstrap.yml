@@ -117,7 +117,7 @@ coreos:
         Requires=docker.service
         [Service]
         EnvironmentFile=/etc/environment
-        ExecStart=/bin/bash -c "/root/promote_masters.sh > /dev/null &"
+        ExecStart=/root/promote_masters.sh
 
     - name: format-ephemeral.service
       command: start
