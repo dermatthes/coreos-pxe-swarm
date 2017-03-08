@@ -58,7 +58,7 @@ then
     DHCP_RANGE_SET="$PXE_SERVER_IP,proxy"
     echo "DHCP_RANGE is $DHCP_RANGE_SET"
 else
-    DHCP_RANGE_SET=$DHCP_RANGE
+    DHCP_RANGE_SET="$DHCP_RANGE"
 fi
 
 
@@ -87,7 +87,7 @@ then
     ln -s /app/tftp/pxelinux.cfg/workerjoin /app/tftp/pxelinux.cfg/default
     echo "MODE SELECT: JOIN MODE!"
     dnsmasq \
-        --dhcp-range="$DHCP_RANGE_SET" \
+        --dhcp-range=$DHCP_RANGE_SET \
         --dhcp-no-overrid \
         --dhcp-boot=pxelinux.0,pxeserver,$PXE_SERVER_IP \
         --pxe-service=x86PC,"Join existing CoreOS Cluster",pxelinux \
@@ -103,7 +103,7 @@ then
 
     sleep 1
     dnsmasq \
-        --dhcp-range="$DHCP_RANGE_SET" \
+        --dhcp-range=$DHCP_RANGE_SET \
         --dhcp-no-overrid \
         --dhcp-boot=pxelinux.0,pxeserver,$PXE_SERVER_IP \
         --pxe-service=x86PC,"Bootstrap CoreOS Cluster",pxelinux \
