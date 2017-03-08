@@ -87,15 +87,5 @@ and start `sudo systemctl restart rpc-mountd`
 
 ### Mounten von shares
 
-```
-    - name: mnt.mount
-      command: start
-      content: |
-        [Mount]
-        What=10.16.0.2:/srv/nfs
-        Where=/mnt
-        Type=nfs
-```
-
-Der name `mnt.mount` muss mit dem `Where=/mnt` übereinstimmen.
-Bei `Where=/some/dir` müsste name `some-dir.mount` heissen.
+Per Option `-e NFS_MOUNT="<ip>:/nfs/path"` wird das Verzeichnis 
+angegeben, dass bei allen Nodes auf /mnt gemounted wird.
