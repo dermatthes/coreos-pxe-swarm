@@ -36,7 +36,7 @@ INTERFACE_BOOTSTRAP="xyz"
 ```
 
 ```
-docker run --net=host -v /path/to/config:/config --name corepxe dermatthes/coreos-pxe-swarm
+docker run --net=host -v /path/to/config:/root/config -v ~/.ssh/id_rsa.pub:/root/rsa_public_key --name corepxe dermatthes/coreos-pxe-swarm
 ```
 
 

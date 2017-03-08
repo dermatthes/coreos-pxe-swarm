@@ -5,6 +5,7 @@ for i in {300..0}; do
  sleep 1
  if [ -e "/tmp/bootstrap_firstshot.lock" ]; then
     echo "[OK] First node feeded successfully - Shutting down bootstrap mode"
+    echo "[-> BOOT THE REST OF YOUR SERVERS NOW]"
     sleep 1;
     exit 0;
  fi
