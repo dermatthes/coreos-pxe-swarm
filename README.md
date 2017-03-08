@@ -75,11 +75,20 @@ sudo mkfs.ext4 -L COREOS_ROOT /dev/sda
 Login to the first node.
 
 
-### Starting NFS4 Server
+### Starting NFS4 Server auf dem externen Fileserver
+
+```
+apt-get install nfs-kernel-server
+```
 
 /etc/exports
 ```
 /mnt  10.16.0.0/24(rw,async,no_subtree_check,no_root_squash,fsid=0)
+```
+
+
+```
+service nfs-kernel-server restart
 ```
 
 and start `sudo systemctl restart rpc-mountd`
