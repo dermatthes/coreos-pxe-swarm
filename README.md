@@ -25,6 +25,21 @@ docker run --net=host -e INTERFACE_BOOTSTRAP=eth2 -e DHCP_RANGE="set:gateway1,19
 
 ## ALL Options
 
+
+### Using Config-File
+
+All Environment-Variables can be defined in one single config-file
+
+```
+INTERFACE_BOOTSTRAP="xyz"
+
+```
+
+```
+docker run --net=host -v /path/to/config:/config --name corepxe dermatthes/coreos-pxe-swarm
+```
+
+
 ### Environment
 
 | Option              | Default           | Description                                           |
@@ -33,6 +48,7 @@ docker run --net=host -e INTERFACE_BOOTSTRAP=eth2 -e DHCP_RANGE="set:gateway1,19
 | MODE                | BOOTSTRAP         | (Internal only)                                       |
 | INTERFACE           | enp0s5            | Primary network interface to configure on nodes       |
 | DHCP_RANGE          | <myip>,proxy      | Pass DHCP options                                     |
+| NFS_MOUNT           | <ip>:/path        | NFS Mount to mount in /mnt                            |
 
 ### Authorized Keys
 

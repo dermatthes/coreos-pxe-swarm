@@ -3,11 +3,7 @@
 set -e
 
 
-if [ -e "/config" ]
-then
-    echo "Loading config from /config"
-    . /config
-fi
+
 
 
 
@@ -24,6 +20,25 @@ if [ $MODE = 'BOOTSTRAP' ]
 then
     echo "BOOTSTRAP MODE..."
 
+
+    if [ -e "/config" ]
+    then
+        if [ ! -f "/config" ]; then
+            echo "/config must be a regular file."
+            exit 1
+        fi
+        echo "Loading config from /config"
+    else
+        echo "Loading empty configuration file"
+        touch /config
+    fi
+
+
+    cp /config /root/config
+
+    echo "Executing /root/config...";
+    . /root/config
+
     ifconfig $INTERFACE_BOOTSTRAP
     if [[ $? != 0 ]]
     then
@@ -37,11 +52,14 @@ then
     echo Autodetect PXE_SERVER_IP: $PXE_SERVER_IP
 
 
-    echo "BOOTSTRAP-MODE: Creating new ssh key pair for inter cluster communication"
-    echo "Keygen deativated!"
+    #echo "BOOTSTRAP-MODE: Creating new ssh key pair for inter cluster communication"
+    #echo "Keygen deativated!"
     #ssh-keygen -b 2048 -t rsa -f /root/id_rsa -q -N ""
-    echo "KEYGEN DONE!"
+    #echo "KEYGEN DONE!"
 
+else
+    echo "Executing /root/config...";
+    . /root/config
 fi
 
 # Using DHCP Proxy Mode
