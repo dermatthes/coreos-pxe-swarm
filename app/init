@@ -56,11 +56,10 @@ fi
 if [ $DHCP_RANGE = '0' ]
 then
     DHCP_RANGE_SET="$PXE_SERVER_IP,proxy"
-    echo "DHCP_RANGE is $DHCP_RANGE_SET"
 else
     DHCP_RANGE_SET="$DHCP_RANGE"
 fi
-
+echo "DHCP_RANGE_SET is $DHCP_RANGE_SET"
 
 
 echo "Use default configs" && cp -a /app/config/. /config
