@@ -26,7 +26,7 @@ write_files:
     owner: core:root
     content: |
       COREOS_PRIVATE_IPV4={{ REMOTE_IP() }}
-      PXE_SERVER_IP={{ ENV("COREOS_PRIVATE_IPV4") }}
+      PXE_SERVER_IP={{ REMOTE_IP() }}
       DHCP_RANGE={{ ENV("DHCP_RANGE") }}
 
 write_files:
@@ -64,7 +64,7 @@ write_files:
       :FORWARD DROP [0:0]
       :OUTPUT ACCEPT [0:0]
       -A INPUT -s 10.0.0.0/8 -d 10.0.0.0/8 -j ACCEPT
-      -I INPUT -d 224.0.0.0/8 -p vrrp -j ACCEPT
+      -A INPUT -m pkttype --pkt-type broadcast -j ACCEPT
       -A INPUT -i lo -j ACCEPT
       -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
       -A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
