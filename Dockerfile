@@ -87,6 +87,7 @@ ENV DHCP=0
 
 # Default: use Proxy mode
 ENV DHCP_RANGE='0'
+ENV NFS_MOUNT="10.16.0.1:/srv/nfs"
 
 
 CMD /app/init

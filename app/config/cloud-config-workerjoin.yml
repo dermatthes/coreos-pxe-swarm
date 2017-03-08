@@ -45,7 +45,7 @@ coreos:
       command: start
       content: |
         [Mount]
-        What=10.16.0.2:/srv/nfs
+        What={{ ENV("NFS_MOUNT") }}
         Where=/mnt
         Type=nfs
 
@@ -87,7 +87,7 @@ coreos:
         Requires=docker.service
         [Service]
         EnvironmentFile=/etc/environment
-        ExecStart=/bin/bash -c "docker swarm join --token $(cat /root/worker_join_token) $PXE_SERVER_IP:2377 && docker run --net=host -e PXE_SERVER_IP={{ REMOTE_IP() }} -e DHCP_RANGE={{ ENV("DHCP_RANGE") }} -e MODE=WORKERJOIN -v /root/worker_join_token:/root/worker_join_token -v /root/rsa_public_key:/root/rsa_public_key --name coreos-pxe-swarm dermatthes/coreos-pxe-swarm"
+        ExecStart=/bin/bash -c "docker swarm join --token $(cat /root/worker_join_token) $PXE_SERVER_IP:2377 && docker run --net=host -e NFS_MOUNT={{ ENV("NFS_MOUNT") }} -e PXE_SERVER_IP={{ REMOTE_IP() }} -e DHCP_RANGE={{ ENV("DHCP_RANGE") }} -e MODE=WORKERJOIN -v /root/worker_join_token:/root/worker_join_token -v /root/rsa_public_key:/root/rsa_public_key --name coreos-pxe-swarm dermatthes/coreos-pxe-swarm"
 
     - name: format-ephemeral.service
       command: start
