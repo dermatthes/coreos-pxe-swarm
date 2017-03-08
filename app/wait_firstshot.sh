@@ -13,5 +13,5 @@ for i in {300..0}; do
 
 done
 
-echo "[ERROR] No node requested PXE data"
+echo "[ERROR] No node requested PXE-Boot within 5 minutes. Exiting!"
 exit 1

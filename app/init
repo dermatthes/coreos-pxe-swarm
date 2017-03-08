@@ -101,6 +101,7 @@ then
         --tftp-root=/app/tftp \
         --user=root
     echo "MODE SELECT: BOOTSTRAP MODE! (new cluster only!) - Waiting 5 Minutes to join first node."
+    echo "Make sure to backup your ssh private key to access"
     . /app/wait_firstshot.sh
 fi
 
