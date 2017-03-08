@@ -129,8 +129,7 @@ coreos:
         [Service]
         Type=oneshot
         RemainAfterExit=yes
-        ExecStart=/usr/sbin/wipefs -f /dev/disk/by-label/COREOS_ROOT
-        ExecStart=/usr/sbin/mkfs.ext4 -L COREOS_ROOT -F /dev/disk/by-label/COREOS_ROOT
+        ExecStart=/usr/sbin/mkfs.ext4 -F -L COREOS_ROOT -F /dev/disk/by-label/COREOS_ROOT
 
     - name: var-lib-docker.mount
       command: start
