@@ -113,7 +113,7 @@ coreos:
       content: |
         [Unit]
         Description=Docker Master
-        After=swarm-join.service
+        After=docker.service
         Requires=docker.service
         [Service]
         EnvironmentFile=/etc/environment
