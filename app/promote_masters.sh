@@ -1,6 +1,9 @@
 #!/bin/bash
 set +e
 
+#
+# Auto-Promote new Nodes
+#
 
 while 1; do
     sleep 30
