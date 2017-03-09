@@ -16,6 +16,9 @@
   "run": [
       "scripts to run on each host"
   ],
+  "run-leader": [
+      "scripts to run only on leader host"
+  ],
   "registry": [
     {
       "url": "someRegistry.someHost.com",
