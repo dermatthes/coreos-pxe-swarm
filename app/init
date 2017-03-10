@@ -3,8 +3,11 @@
 set -e
 
 
+ls -l /root
+
 if [ ! -e "/root/master_run.sh" ]
 then
+    echo "Creating empty /root/master_run.sh"
     touch /root/master_run.sh
 fi
 
@@ -16,6 +19,7 @@ fi
 
 if [ ! -e "/root/bootstrap_run.sh" ]
 then
+    echo "Creating empty /root/bootstrap_run.sh"
     touch /root/bootstrap_run.sh
 fi
 
