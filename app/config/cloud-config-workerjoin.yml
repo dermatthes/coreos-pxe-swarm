@@ -11,11 +11,11 @@ write_files:
     content: {{ TRIM(FILE("/root/worker_join_token")) }}
 
 write_files:
-  - path: "/root/run_master.sh"
+  - path: "/root/master_run.sh"
     encoding: b64
     permissions: '0700'
     owner: core:root
-    content: {{ BASE64_ENC(FILE("/root/run_master.sh")) }}
+    content: {{ BASE64_ENC(FILE("/root/master_run.sh")) }}
 
 write_files:
   - path: "/root/rsa_public_key"
@@ -169,8 +169,8 @@ coreos:
       content: |
         [Unit]
         Description=Run the Script /root/master_run.sh
-        After=docker.service
-        Requires=docker.service
+        After=swarm-join.service
+        Requires=swarm-join.service
         [Service]
         Type=oneshot
         EnvironmentFile=/etc/environment

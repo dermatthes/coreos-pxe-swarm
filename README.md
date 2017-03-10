@@ -99,11 +99,22 @@ and start `sudo systemctl restart rpc-mountd`
 Per Option `-e NFS_MOUNT="<ip>:/nfs/path"` wird das Verzeichnis 
 angegeben, dass bei allen Nodes auf /mnt gemounted wird.
 
+## Ausführen eines Scripts auf der ersten Node (PXE)
+
+Script einfach per -v einbinden:
+
+```
+-v /path/to/script:/root/bootstrap_run.sh
+```
+
+Hier kann z.B. ein `docker login` erfolgen oder irgendwelche
+Secrets hinterlegt werden.
+
 
 ## Ausführen eines Scripts auf allen Nodes nach erfolgtem Startup
 
 Script einfach per -v einbinden:
 
 ```
--v /path/to/script:/root/run_master.sh
+-v /path/to/script:/root/master_run.sh
 ```

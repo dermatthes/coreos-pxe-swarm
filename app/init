@@ -14,6 +14,17 @@ then
     exit -1
 fi
 
+if [ ! -e "/root/bootstrap_run.sh" ]
+then
+    touch /root/bootstrap_run.sh
+fi
+
+if [ ! -f "/root/bootstrap_run.sh" ]
+then
+    echo "[ERROR] /root/bootstrap_run.sh is no regular file"
+    exit -1
+fi
+
 
 if [ $DEVMODE = '1' ]
 then

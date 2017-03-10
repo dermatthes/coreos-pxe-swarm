@@ -15,12 +15,18 @@ write_files:
 
 
 write_files:
-  - path: "/root/run_master.sh"
+  - path: "/root/master_run.sh"
     encoding: b64
     permissions: '0700'
     owner: core:root
-    content: {{ BASE64_ENC(FILE("/root/run_master.sh")) }}
+    content: {{ BASE64_ENC(FILE("/root/master_run.sh")) }}
 
+write_files:
+  - path: "/root/bootstrap_run.sh"
+    encoding: b64
+    permissions: '0700'
+    owner: core:root
+    content: {{ BASE64_ENC(FILE("/root/bootstrap_run.sh")) }}
 
 write_files:
   - path: "/root/config"
@@ -170,13 +176,26 @@ coreos:
       command: start
       enable: true
 
+    - name: run-bootstrap.service
+      command: start
+      content: |
+        [Unit]
+        Description=Run the Script /root/bootstrap_run.sh (only on first node)
+        After=swarm-init.service
+        Requires=swarm-init.service
+        [Service]
+        Type=oneshot
+        EnvironmentFile=/etc/environment
+        RemainAfterExit=yes
+        ExecStart=/root/bootstrap_run.sh
+
     - name: run-master.service
       command: start
       content: |
         [Unit]
         Description=Run the Script /root/master_run.sh
-        After=docker.service
-        Requires=docker.service
+        After=run-bootstrap.service
+        Requires=run-bootstrap.service
         [Service]
         Type=oneshot
         EnvironmentFile=/etc/environment
