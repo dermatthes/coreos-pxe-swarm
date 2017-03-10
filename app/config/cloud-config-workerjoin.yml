@@ -83,6 +83,8 @@ write_files:
       :FORWARD DROP [0:0]
       :OUTPUT ACCEPT [0:0]
       -A INPUT -s 10.0.0.0/8 -d 10.0.0.0/8 -j ACCEPT
+      -A INPUT -d 10.19.0.0/24 -j ACCEPT
+      -A FORWARD -d 10.19.0.0/24 -j ACCEPT
       -A INPUT -m pkttype --pkt-type broadcast -j ACCEPT
       -A INPUT -i lo -j ACCEPT
       -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
