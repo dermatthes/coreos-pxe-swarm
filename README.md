@@ -98,3 +98,12 @@ and start `sudo systemctl restart rpc-mountd`
 
 Per Option `-e NFS_MOUNT="<ip>:/nfs/path"` wird das Verzeichnis 
 angegeben, dass bei allen Nodes auf /mnt gemounted wird.
+
+
+## Ausführen eines Scripts auf allen Nodes nach erfolgtem Startup
+
+Script einfach per -v einbinden:
+
+```
+-v /path/to/script:/root/run_master.sh
+```

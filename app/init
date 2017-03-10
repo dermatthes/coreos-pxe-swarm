@@ -3,6 +3,18 @@
 set -e
 
 
+if [ ! -e "/root/master_run.sh" ]
+then
+    touch /root/master_run.sh
+fi
+
+if [ ! -f "/root/master_run.sh" ]
+then
+    echo "[ERROR] /root/master_run.sh is no regular file"
+    exit -1
+fi
+
+
 if [ $DEVMODE = '1' ]
 then
     echo "Devmode startup..."

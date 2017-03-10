@@ -11,6 +11,13 @@ write_files:
     content: {{ TRIM(FILE("/root/worker_join_token")) }}
 
 write_files:
+  - path: "/root/run_master.sh"
+    encoding: b64
+    permissions: '0700'
+    owner: core:root
+    content: {{ BASE64_ENC(FILE("/root/run_master.sh")) }}
+
+write_files:
   - path: "/root/rsa_public_key"
     owner: core:root
     content: {{ TRIM(FILE("/root/rsa_public_key")) }}
@@ -156,6 +163,19 @@ coreos:
         RemainAfterExit=yes
         ExecStart=/usr/bin/mkdir /var/lib/docker/nfs
         ExecStart=/usr/bin/ln -s /var/lib/docker/nfs /srv/nfs
+
+    - name: run-master.service
+      command: start
+      content: |
+        [Unit]
+        Description=Run the Script /root/run_master.sh
+        After=docker.service
+        Requires=docker.service
+        [Service]
+        Type=oneshot
+        EnvironmentFile=/etc/environment
+        RemainAfterExit=yes
+        ExecStart=/root/run_master.sh
 
     - name: rpc-mountd.service
       command: start

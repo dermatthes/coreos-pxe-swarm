@@ -13,6 +13,15 @@ write_files:
     owner: core:root
     content: {{ BASE64_ENC(FILE("/root/rsa_public_key")) }}
 
+
+write_files:
+  - path: "/root/run_master.sh"
+    encoding: b64
+    permissions: '0700'
+    owner: core:root
+    content: {{ BASE64_ENC(FILE("/root/run_master.sh")) }}
+
+
 write_files:
   - path: "/root/config"
     owner: core:root
@@ -161,6 +170,18 @@ coreos:
       command: start
       enable: true
 
+    - name: run-master.service
+      command: start
+      content: |
+        [Unit]
+        Description=Run the Script /root/run_master.sh
+        After=docker.service
+        Requires=docker.service
+        [Service]
+        Type=oneshot
+        EnvironmentFile=/etc/environment
+        RemainAfterExit=yes
+        ExecStart=/root/run_master.sh
 
     - name: docker.service
       drop-ins:
