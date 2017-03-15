@@ -88,6 +88,7 @@ write-files:
     permissions: '0644'
     content: |
       OPTS_RPC_MOUNTD=""
+
 coreos:
   units:
     - name: rpc-statd.service
