@@ -61,35 +61,27 @@ write_files:
     content: |
       /srv/nfs 10.16.0.0/24(rw,async,no_subtree_check,no_root_squash,fsid=0)
 
+
 write_files:
-  - path: /var/lib/iptables/rules-save
-    permissions: 0644
+  - path: "/root/firewall.rules"
+    encoding: b64
+    permissions: '0655'
+    owner: core:root
+    content: {{ BASE64_ENC(FILE("/root/firewall.rules")) }}
+
+write_files:
+  - path: "/var/lib/iptables/rules-save"
+    encoding: b64
+    permissions: '0655'
+    owner: core:root
+    content: {{ BASE64_ENC(FILE("/root/firewall.rules")) }}
+
+write_files:
+  - path: "/root/reboot-timer.sh"
     owner: root:root
-    content: |
-      *filter
-      :INPUT ACCEPT [0:0]
-      :FORWARD DROP [0:0]
-      :OUTPUT ACCEPT [0:0]
-      -A INPUT -s 10.0.0.0/8 -d 10.0.0.0/8 -j ACCEPT
-      -A INPUT -d 10.19.0.0/24 -j ACCEPT
-      -A FORWARD -d 10.19.0.0/24 -j ACCEPT
-      -I INPUT -d 224.0.0.0/8 -p vrrp -j ACCEPT
-      -I OUTPUT -d 224.0.0.0/8 -p vrrp -j ACCEPT
-      -A INPUT -m pkttype --pkt-type broadcast -j ACCEPT
-      -A INPUT -i lo -j ACCEPT
-      -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
-      -A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
-      -A INPUT -p tcp -m tcp --dport 80 -j ACCEPT
-      -A INPUT -p tcp -m tcp --dport 443 -j ACCEPT
-      -A INPUT -p icmp -m icmp --icmp-type 0 -j ACCEPT
-      -A INPUT -p icmp -m icmp --icmp-type 8 -j ACCEPT
-      -A INPUT -p icmp -m icmp --icmp-type 3 -j ACCEPT
-      -A INPUT -p icmp -m icmp --icmp-type 11 -j ACCEPT
-      -A INPUT -d 0.0.0.0/0 -j DROP
-      COMMIT
-
-
-
+    permissions: '0700'
+    encoding: b64
+    content: {{ BASE64_ENC(FILE("/app/reboot-timer.sh")) }}
 
 write-files:
   - path: /etc/conf.d/nfs
@@ -124,7 +116,7 @@ coreos:
         Requires=docker.service
         [Service]
         EnvironmentFile=/etc/environment
-        ExecStart=/bin/bash -c "docker swarm init --advertise-addr {{ REMOTE_IP() }} && docker swarm join-token -q worker > /root/worker_join_token && sleep 5 && docker run --net=host -e NFS_MOUNT={{ ENV("NFS_MOUNT") }} -e MODE=WORKERJOIN -e DHCP_RANGE=$DHCP_RANGE -e PXE_SERVER_IP=$COREOS_PRIVATE_IPV4 -v /root/master_run.sh:/root/master_run.sh -v /root/config:/root/config -v /root/worker_join_token:/root/worker_join_token -v /root/rsa_public_key:/root/rsa_public_key --name coreos-pxe-swarm dermatthes/coreos-pxe-swarm"
+        ExecStart=/bin/bash -c "docker swarm init --advertise-addr {{ REMOTE_IP() }} && docker swarm join-token -q worker > /root/worker_join_token && sleep 5 && docker run --net=host -e NFS_MOUNT={{ ENV("NFS_MOUNT") }} -e MODE=WORKERJOIN -e DHCP_RANGE=$DHCP_RANGE -e PXE_SERVER_IP=$COREOS_PRIVATE_IPV4 -v /root/master_run.sh:/root/master_run.sh -v /root/firewall.rules:/root/firewall.rules -v /root/config:/root/config -v /root/worker_join_token:/root/worker_join_token -v /root/rsa_public_key:/root/rsa_public_key --name coreos-pxe-swarm dermatthes/coreos-pxe-swarm"
         ExecStop=/usr/bin/docker stop coreos-pxe-swarm
 
     - name: promote-master.service
@@ -137,6 +129,18 @@ coreos:
         [Service]
         EnvironmentFile=/etc/environment
         ExecStart=/root/promote_masters.sh
+
+    - name: reboot.service
+      command: start
+      content: |
+        [Unit]
+        Description=Reboot the server
+        After=sysinit.target
+        Requires=sysinit.target
+        [Service]
+        Restart=always
+        EnvironmentFile=/etc/environment
+        ExecStart=/root/reboot-timer.sh
 
     - name: format-ephemeral.service
       command: start

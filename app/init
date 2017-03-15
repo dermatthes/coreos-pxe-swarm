@@ -5,6 +5,13 @@ set -e
 
 ls -l /root
 
+
+if [ ! -e "/root/firewall.rules" ]
+then
+    echo "Createing empty firewall rules"
+    touch /root/firewall.rules
+fi
+
 if [ ! -e "/root/master_run.sh" ]
 then
     echo "Creating empty /root/master_run.sh"
