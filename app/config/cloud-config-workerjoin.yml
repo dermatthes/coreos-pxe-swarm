@@ -57,7 +57,8 @@ write_files:
 
 write_files:
   - path: "/etc/exports"
-    permissions: '0655'encoding: b64
+    permissions: '0655'
+    encoding: b64
     owner: core:root
     content: |
       /srv/nfs 10.16.0.0/24(rw,async,no_subtree_check,no_root_squash,fsid=0)
