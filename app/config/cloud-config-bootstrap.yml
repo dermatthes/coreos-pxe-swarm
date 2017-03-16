@@ -45,13 +45,8 @@ write_files:
   - path: "/root/promote_masters.sh"
     owner: core:root
     permissions: '0755'
-    content: |
-      #!/bin/bash
-      set +e
-      while [ 1 ]; do
-          sleep 30
-          docker node promote `docker node ls | tail -n +2 | awk '{print $1} '`
-      done
+    encoding: b64
+    content: {{ BASE64_ENC(FILE("/app/promote-masters.sh")) }}
 
 
 write_files:
