@@ -1,11 +1,12 @@
 #!/bin/bash
+
 set +e
 
 #
 # Auto-Promote new Nodes
 #
 
-while 1; do
+while [ true ]; do
     sleep 30
     HOSTS_WITHOUT_MASTER_STATUS=`docker node ls | tail -n +2 | grep "Ready" | grep "Active" | grep -v "Leader" | grep -v "Reachable"`
 
