@@ -3,11 +3,17 @@
 set +e
 
 #
-# Auto-Promote new Nodes
+# Auto-Promote/Demote/RM new/old Nodes
 #
 
 while [ true ]; do
     sleep 30
+
+    if [ `hostname` != `docker node ls | grep "Leader" | awk '{print $3}'` ]; then
+        echo "[$(date)] I'm not the swarm master... Skipping."
+        sleep 120
+        continue
+    fi
 
     HOSTS_TO_REMOVE=`docker node ls | tail -n +2 | grep "Down" | grep "Unreachable"`
     HOSTS_TO_REMOVE_COUNT=`docker node ls | tail -n +2 | grep "Down" | grep "Unreachable" | wc -l`
