@@ -12,6 +12,7 @@ CONF_MIN_DOCKER_NODES=4
 
 
 
+
 set +e
 
 ##
@@ -80,9 +81,10 @@ do
         if [ `shuf -i0-15 -n1` -eq 1 ]
         then
             echo "Rebooting now..."
-            docker kill cloud-node-vip
+            echo "Rebooting canceled!"
+            #docker kill cloud-node-vip
             sleep 1
-            reboot
+            #reboot
         fi
     done
 done
